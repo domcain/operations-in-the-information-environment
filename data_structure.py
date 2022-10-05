@@ -1,17 +1,25 @@
 import user_input
 
-# A class to represent the adjacency list of the node
-class AdjNode:
-    def __init__(self, data):
-        self.vertex = data
-        self.next = None
+NumberOfGreenNodes = user_input.get('NumberOfGreenNodes')
+ProbabilityOfConnection = user_input.get('ProbabilityOfConnection')
+NumberOfGreyAgents = user_input.get('NumberOfGreyAgents')
+RedSpyProportion = user_input.get('RedSpyProportion')
+Certainty = user_input.get('Certainty')
 
+# A class to represent the adjacency list of the nodes
+class AdjNode:
+    def __init__(self, data, team, certainty, connections, ):
+        self.vertex = data
+        self.team = team
+        self.certainty = certainty
+        self.connections = connections
+        self.next = None
 
 # A class to represent a graph. A graph is the list of the adjacency lists.
 # Size of the array will be the no. of the vertices "V"
 class Graph:
-    def __init__(self, vertices):
-        self.V = vertices
+    def __init__(self, NumberOfGreenNodes):
+        self.V = NumberOfGreenNodes
         self.NewGraph = [None] * self.V
 
     # Function to add an edge in an undirected graph
@@ -29,9 +37,10 @@ class Graph:
 
     # Function to create the graph
     def create_graph(self):
-        for _ in range(user_input.NumberOfGreenNodes):
-
-            continue
+        for i in range(self.V):
+            for j in range(self.V):
+                Graph.add_edge(self,i,j)
+                
 
     # Function to print the graph
     def print_graph(self):
@@ -48,13 +57,7 @@ class Graph:
 if __name__ == "__main__":
     V = 5
     NewGraph = Graph(V)
-    NewGraph.add_edge(0, 1)
-    NewGraph.add_edge(0, 4)
-    NewGraph.add_edge(1, 2)
-    NewGraph.add_edge(1, 3)
-    NewGraph.add_edge(1, 4)
-    NewGraph.add_edge(2, 3)
-    NewGraph.add_edge(3, 4)
+    create_graph()
 
     NewGraph.print_graph()
 
