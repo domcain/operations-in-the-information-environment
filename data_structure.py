@@ -56,7 +56,7 @@ class Graph:
 # Driver program to the above graph class
 if __name__ == "__main__":
     V = 5
-    newgraph = Graph(V)
+    newgraph = Graph(V, NumberOfGreenNodes)
     newgraph.create_graph()
 
     newgraph.print_graph()
