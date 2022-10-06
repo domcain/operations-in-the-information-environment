@@ -1,12 +1,6 @@
-import user_input
-
-NumberOfGreenNodes = user_input.get('NumberOfGreenNodes')
-ProbabilityOfConnection = user_input.get('ProbabilityOfConnection')
-NumberOfGreyAgents = user_input.get('NumberOfGreyAgents')
-RedSpyProportion = user_input.get('RedSpyProportion')
-Certainty = user_input.get('Certainty')
-
 # A class to represent the adjacency list of the nodes
+from user_input import NumberOfGreenNodes
+
 class AdjNode:
     def __init__(self, data, team, certainty, connections, ):
         self.vertex = data
@@ -56,7 +50,7 @@ class Graph:
 # Driver program to the above graph class
 if __name__ == "__main__":
     V = 5
-    newgraph = Graph(V, NumberOfGreenNodes)
+    newgraph = Graph(NumberOfGreenNodes)
     newgraph.create_graph()
 
     newgraph.print_graph()

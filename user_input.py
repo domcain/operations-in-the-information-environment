@@ -1,3 +1,5 @@
+from data_structure import AdjNode, Graph
+
 NumberOfGreenNodes = None
 ProbabilityOfConnection = None
 NumberOfGreyAgents = None
@@ -23,3 +25,15 @@ def user_input():
     )
 
 user_input()
+
+# Function to create the graph
+def populate_edges(self, Graph):
+    for i in range(self.V):
+        for j in range(self.V):
+            newgraph.add_edge(self,i,j)
+                
+# Driver program to the above graph class    
+    newgraph = Graph(NumberOfGreenNodes)
+    populate_edges(newgraph)
+
+    newgraph.print_graph()
