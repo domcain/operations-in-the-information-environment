@@ -20,20 +20,20 @@ class AdjNode:
 class Graph:
     def __init__(self, NumberOfGreenNodes):
         self.V = NumberOfGreenNodes
-        self.NewGraph = [None] * self.V
+        self.newgraph = [None] * self.V
 
     # Function to add an edge in an undirected graph
     def add_edge(self, src, dest):
         # Adding the node to the source node
         node = AdjNode(dest)
-        node.next = self.NewGraph[src]
-        self.NewGraph[src] = node
+        node.next = self.newgraph[src]
+        self.newgraph[src] = node
 
         # Adding the source node to the destination as
         # it is the undirected graph
         node = AdjNode(src)
-        node.next = self.NewGraph[dest]
-        self.NewGraph[dest] = node
+        node.next = self.newgraph[dest]
+        self.newgraph[dest] = node
 
     # Function to create the graph
     def create_graph(self):
@@ -46,7 +46,7 @@ class Graph:
     def print_graph(self):
         for i in range(self.V):
             print("Adjacency list of vertex {}\n head".format(i), end="")
-            temp = self.NewGraph[i]
+            temp = self.newgraph[i]
             while temp:
                 print(" -> {}".format(temp.vertex), end="")
                 temp = temp.next
@@ -56,9 +56,7 @@ class Graph:
 # Driver program to the above graph class
 if __name__ == "__main__":
     V = 5
-    NewGraph = Graph(V)
-    create_graph()
+    newgraph = Graph(V)
+    newgraph.create_graph()
 
-    NewGraph.print_graph()
-
-# This code is contributed by Kanav Malhotra
+    newgraph.print_graph()
