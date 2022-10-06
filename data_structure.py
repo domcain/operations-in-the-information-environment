@@ -39,7 +39,7 @@ class Graph:
     def create_graph(self):
         for i in range(self.V):
             for j in range(self.V):
-                Graph.add_edge(self,i,j)
+                newgraph.add_edge(self,i,j)
                 
 
     # Function to print the graph
