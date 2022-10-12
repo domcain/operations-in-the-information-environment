@@ -18,13 +18,13 @@ def user_input():
     LowCertainty,HighCertainty = [float(x) for x in input(
         "Enter the Certainty interval of the Green Team. (e.g. [-0.1,0.1] or [-0.5,0.7]): "
     ).split(',')]
-    # print(
-    #     "Size of the Green Team: " + NumberOfGreenNodes + "\n",
-    #     "Probability of a connection between any given green player: " + ProbabilityOfConnection + "\n",
-    #     "Number of agents in the Grey Team: " + NumberOfGreyAgents + "\n",
-    #     "Proportion of Red Spies within the Grey Team: " + RedSpyProportion + "\n",
-    #     "Certainty interval of the Green Team: " + Certainty + "\n"
-    # )
+    print(
+        "Size of the Green Team: " + str(NumberOfGreenNodes) + "\n",
+        "Probability of a connection between any given green player: " + str(ProbabilityOfConnection) + "\n",
+        "Number of agents in the Grey Team: " + str(NumberOfGreyAgents) + "\n",
+        "Proportion of Red Spies within the Grey Team: " + str(RedSpyProportion) + "\n",
+        "Certainty interval of the Green Team: " + str(LowCertainty, HighCertainty) + "\n"
+    )
 
 user_input()
 newgraph = Graph(NumberOfGreenNodes)
