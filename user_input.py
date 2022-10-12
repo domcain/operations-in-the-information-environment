@@ -1,13 +1,17 @@
 from data_structure import AdjNode, Graph
 import random
 
-
+NumberOfRedAgents = 1
+NumberOfBlueAgents = 1
 NumberOfGreenNodes = None
 ProbabilityOfConnection = None
 NumberOfGreyAgents = None
 RedSpyProportion = None
 LowCertainty = None
 HighCertainty = None
+TotalNumberOfNodes = NumberOfGreenNodes + NumberOfGreyAgents + NumberOfRedAgents + NumberOfBlueAgents
+
+teams = [greenTeam, blueTeam, redTeam, greyTeam]
 greenTeam   = 0
 blueTeam    = 1
 redTeam     = 2
@@ -32,8 +36,16 @@ def user_input():
         "Certainty interval of the Green Team: " + str(LowCertainty) + ', ' + str(HighCertainty) + "\n"
     )
 
-def reset(percent):
+def random_yes_no(percent):
     return random.randrange(1) < percent
+
+def assign_team():
+    global teams, greenTeam, blueTeam, redTeam, greyTeam
+    count = 0
+    while count < TotalNumberOfNodes:
+        
+        count += 1
+    return team
 
 user_input()
 newgraph = Graph(NumberOfGreenNodes)
@@ -42,10 +54,11 @@ newgraph = Graph(NumberOfGreenNodes)
 # to each node in the process
 def populate_edges(Graph):
     for i in range(NumberOfGreenNodes):
+        # Appropriately assign randomised values to each node
         Graph.team = greenTeam
         Graph.certainty = random.uniform(LowCertainty, HighCertainty)
-        Graph.willVote = reset(0.3)
-        Graph.ignoreRed = reset(0.1)
+        Graph.willVote = random_yes_no(0.3)
+        Graph.ignoreRed = random_yes_no(0.1)
         for j in range(NumberOfGreenNodes):
             Graph.add_edge(i,j)
             print(Graph.add_edge(i, j))
