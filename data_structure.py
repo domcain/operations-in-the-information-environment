@@ -1,12 +1,14 @@
-# A class to represent the adjacency list of the nodes
-from user_input import NumberOfGreenNodes
+# # A class to represent the adjacency list of the nodes
+# from user_input import NumberOfGreenNodes
 
 class AdjNode:
-    def __init__(self, data, team, certainty, connections, ):
+    def __init__(self, data, WillVote, team, certainty, friends):
         self.vertex = data
+        self.IgnoreRed = False
+        self.WillVote = WillVote
         self.team = team
         self.certainty = certainty
-        self.connections = connections
+        self.connections = friends
         self.next = None
 
 # A class to represent a graph. A graph is the list of the adjacency lists.
@@ -33,7 +35,7 @@ class Graph:
     def create_graph(self):
         for i in range(self.V):
             for j in range(self.V):
-                newgraph.add_edge(self,i,j)
+                self.add_edge(i,j)
                 
 
     # Function to print the graph
@@ -45,12 +47,3 @@ class Graph:
                 print(" -> {}".format(temp.vertex), end="")
                 temp = temp.next
             print(" \n")
-
-
-# Driver program to the above graph class
-if __name__ == "__main__":
-    V = 5
-    newgraph = Graph(NumberOfGreenNodes)
-    newgraph.create_graph()
-
-    newgraph.print_graph()
