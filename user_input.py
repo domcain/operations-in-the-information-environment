@@ -6,6 +6,7 @@ NumberOfGreyAgents = None
 RedSpyProportion = None
 LowCertainty = None
 HighCertainty = None
+
 def user_input():
     global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty
     NumberOfGreenNodes = int(input("Enter the size of the Green Team: "))
