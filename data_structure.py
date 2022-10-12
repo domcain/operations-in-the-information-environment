@@ -10,7 +10,7 @@ class AdjNode:
         self.next = None
 
 # A class to represent a graph. A graph is the list of the adjacency lists.
-# Size of the array will be the no. of the vertices "V"
+# Size of the array will be the number of the vertices "V"
 class Graph:
     def __init__(self, NumberOfGreenNodes):
         self.V = NumberOfGreenNodes

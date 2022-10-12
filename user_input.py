@@ -1,3 +1,4 @@
+from typing_extensions import Self
 from data_structure import AdjNode, Graph
 
 NumberOfGreenNodes = None
@@ -25,15 +26,17 @@ def user_input():
     )
 
 user_input()
-
+newgraph = Graph(NumberOfGreenNodes)
 # Function to create the graph
 def populate_edges(self, Graph):
-    for i in range(self.V):
-        for j in range(self.V):
-            newgraph.add_edge(self,i,j)
+    for i in range(NumberOfGreenNodes):
+        for j in range(NumberOfGreenNodes):
+            Graph.add_edge(self,i,j)
+            print(Graph.add_edge(self, i, j))
+    return
                 
 # Driver program to the above graph class    
-    newgraph = Graph(NumberOfGreenNodes)
-    populate_edges(newgraph)
 
-    newgraph.print_graph()
+populate_edges(Self, newgraph)
+
+newgraph.print_graph()
