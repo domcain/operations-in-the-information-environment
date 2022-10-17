@@ -46,25 +46,24 @@ user_input()
 TotalNumberOfNodes = (NumberOfGreenNodes + NumberOfGreyAgents + NumberOfRedAgents + NumberOfBlueAgents)
 
 G = nx.complete_graph(TotalNumberOfNodes)
-
-blue_node_id = 0
-red_node_id = 1
+color_map = ['blue' if nodes == blueTeam else 'red' if nodes == redTeam else 'green' for nodes in G]
 
 for i in G.nodes:
     if i == blueTeam:
-        G.node[i]["Team"] = "Blue"
+        G.nodes[i]["Team"] = "Blue"
+        # color_map.append('blue')
     if i == redTeam:
-        G.node[i]["Team"] = "Red"    
+        G.nodes[i]["Team"] = "Red" 
+        # color_map.append('red')   
     G.nodes[i]["Team"] = "Green"
-    G.node[i]["Certainty"] = random.randint(LowCertainty,HighCertainty)
-    G.node[i]["Will Vote"] = False
-    G.node[i]["Ignore Red"] = False
+    # color_map.append('green')
+    G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
+    G.nodes[i]["Will Vote"] = False
+    G.nodes[i]["Ignore Red"] = False
 
-# def initialise_graph(G):
-    
-    
+ 
 
-nx.draw(G, with_labels=1)
+nx.draw(G, node_color=color_map, with_labels=1)
 plt.show()
 
 # def random_yes_no(percent):
