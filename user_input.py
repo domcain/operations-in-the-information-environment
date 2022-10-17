@@ -49,19 +49,17 @@ G = nx.complete_graph(TotalNumberOfNodes)
 color_map = ['blue' if nodes == blueTeam else 'red' if nodes == redTeam else 'green' for nodes in G]
 
 for i in G.nodes:
+    # First node is the Blue Agent
     if i == blueTeam:
         G.nodes[i]["Team"] = "Blue"
-        # color_map.append('blue')
+    # Second node is the Red Agent
     if i == redTeam:
-        G.nodes[i]["Team"] = "Red" 
-        # color_map.append('red')   
+        G.nodes[i]["Team"] = "Red"   
+    # Every other node is Green
     G.nodes[i]["Team"] = "Green"
-    # color_map.append('green')
     G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
     G.nodes[i]["Will Vote"] = False
     G.nodes[i]["Ignore Red"] = False
-
- 
 
 nx.draw(G, node_color=color_map, with_labels=1)
 plt.show()
