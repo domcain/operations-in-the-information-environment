@@ -1,5 +1,7 @@
-from data_structure import AdjNode, Graph
+# from data_structure import AdjNode, Graph
 import random
+import networkx as nx
+import matplotlib.pyplot as plt
 
 NumberOfRedAgents = 1
 NumberOfBlueAgents = 1
@@ -9,13 +11,17 @@ NumberOfGreyAgents = None
 RedSpyProportion = None
 LowCertainty = None
 HighCertainty = None
-TotalNumberOfNodes = NumberOfGreenNodes + NumberOfGreyAgents + NumberOfRedAgents + NumberOfBlueAgents
 
-teams = [greenTeam, blueTeam, redTeam, greyTeam]
-greenTeam   = 0
-blueTeam    = 1
-redTeam     = 2
+
+# teams = [greenTeam, blueTeam, redTeam, greyTeam]
+
+blueTeam    = 0
+redTeam     = 1
+greenTeam   = 2
 greyTeam    = 3
+
+
+
 
 def user_input():
     global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty
@@ -36,34 +42,61 @@ def user_input():
         "Certainty interval of the Green Team: " + str(LowCertainty) + ', ' + str(HighCertainty) + "\n"
     )
 
-def random_yes_no(percent):
-    return random.randrange(1) < percent
-
-def assign_team():
-    global teams, greenTeam, blueTeam, redTeam, greyTeam
-    count = 0
-    while count < TotalNumberOfNodes:
-        
-        count += 1
-    return team
-
 user_input()
-newgraph = Graph(NumberOfGreenNodes)
+TotalNumberOfNodes = (NumberOfGreenNodes + NumberOfGreyAgents + NumberOfRedAgents + NumberOfBlueAgents)
 
-# Function to create the graph, and assign relevent values 
-# to each node in the process
-def populate_edges(Graph):
-    for i in range(NumberOfGreenNodes):
-        # Appropriately assign randomised values to each node
-        Graph.team = greenTeam
-        Graph.certainty = random.uniform(LowCertainty, HighCertainty)
-        Graph.willVote = random_yes_no(0.3)
-        Graph.ignoreRed = random_yes_no(0.1)
-        for j in range(NumberOfGreenNodes):
-            Graph.add_edge(i,j)
-            print(Graph.add_edge(i, j))
-    return newgraph
+G = nx.complete_graph(TotalNumberOfNodes)
+
+blue_node_id = 0
+red_node_id = 1
+
+for i in G.nodes:
+    if i == blueTeam:
+        G.node[i]["Team"] = "Blue"
+    if i == redTeam:
+        G.node[i]["Team"] = "Red"    
+    G.nodes[i]["Team"] = "Green"
+    G.node[i]["Certainty"] = random.randint(LowCertainty,HighCertainty)
+    G.node[i]["Will Vote"] = False
+    G.node[i]["Ignore Red"] = False
+
+# def initialise_graph(G):
+    
+    
+
+nx.draw(G, with_labels=1)
+plt.show()
+
+# def random_yes_no(percent):
+#     return random.randrange(1) < percent
+
+# # function to decide which team a node should be assigned according to a set distribution
+# def assign_team():
+#     global teams, greenTeam, blueTeam, redTeam, greyTeam
+#     count = 0
+#     # while we haven't assigned each node a team
+#     while count < TotalNumberOfNodes:
+        
+#         count += 1
+#     return team
+
+# user_input()
+# newgraph = Graph(NumberOfGreenNodes)
+
+# # Function to create the graph, and assign relevent values 
+# # to each node in the process
+# def populate_edges(Graph):
+#     for i in range(NumberOfGreenNodes):
+#         # Appropriately assign randomised values to each node
+#         Graph.team = greenTeam
+#         Graph.certainty = random.uniform(LowCertainty, HighCertainty)
+#         Graph.willVote = random_yes_no(0.3)
+#         Graph.ignoreRed = random_yes_no(0.1)
+#         for j in range(NumberOfGreenNodes):
+#             Graph.add_edge(i,j)
+#             print(Graph.add_edge(i, j))
+#     return newgraph
                 
-# Driver program to the above graph class    
-populate_edges(newgraph)
-newgraph.print_graph()
+# # Driver program to the above graph class    
+# populate_edges(newgraph)
+# newgraph.print_graph()

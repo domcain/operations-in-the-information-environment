@@ -2,3 +2,4 @@
 # to ensure you have the correct requirements/versions
 plotly==5.10.0
 networkx==2.8.7
+matplotlib==3.6.1
