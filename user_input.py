@@ -36,11 +36,17 @@ def user_input():
     )
 
 user_input()
+
+# Variable used to construct the graph 
 TotalNumberOfNodes = (NumberOfGreenNodes + NumberOfGreyAgents + NumberOfRedAgents + NumberOfBlueAgents)
 
+# Create the graph
 G = nx.complete_graph(TotalNumberOfNodes)
+
+# Assign colours to the graph
 color_map = ['blue' if nodes == blueTeam else 'red' if nodes == redTeam else 'green' for nodes in G]
 
+# Initialise the graph, assign each node the relevent information
 for i in G.nodes:
     # First node is the Blue Agent
     if i == blueTeam:
@@ -59,6 +65,10 @@ nx.draw(G, node_color=color_map, with_labels=1)
 
 # Generate user interface of the graph  
 plt.show()
+
+
+
+
 
 # def random_yes_no(percent):
 #     return random.randrange(1) < percent
