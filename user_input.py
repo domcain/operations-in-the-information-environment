@@ -61,7 +61,10 @@ for i in G.nodes:
     G.nodes[i]["Will Vote"] = False
     G.nodes[i]["Ignore Red"] = False
 
+# Build internal representation of the graph
 nx.draw(G, node_color=color_map, with_labels=1)
+
+# Generate user interface of the graph  
 plt.show()
 
 # def random_yes_no(percent):
