@@ -1,4 +1,3 @@
-# from data_structure import AdjNode, Graph
 import random
 import networkx as nx
 import matplotlib.pyplot as plt
