@@ -37,7 +37,7 @@ def user_input():
 user_input()
 
 # Variable used to construct the graph 
-TotalNumberOfNodes = (NumberOfGreenNodes + NumberOfGreyAgents + NumberOfRedAgents + NumberOfBlueAgents)
+TotalNumberOfNodes = (NumberOfGreenNodes + NumberOfRedAgents + NumberOfBlueAgents)
 
 # A certainty level, above which a green node will vote in the election
 VoteThreshold = (HighCertainty + LowCertainty) / 2
