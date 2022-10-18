@@ -12,8 +12,6 @@ LowCertainty = None
 HighCertainty = None
 blueTeam    = 0
 redTeam     = 1
-greenTeam   = 2
-greyTeam    = 3
 
 # A function that iteratively asks the user for input parameters that will be used to construct the graph 
 def user_input():
