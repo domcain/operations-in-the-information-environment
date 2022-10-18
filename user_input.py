@@ -10,6 +10,7 @@ NumberOfGreyAgents = None
 RedSpyProportion = None
 LowCertainty = None
 HighCertainty = None
+VoteThreshold = None
 blueTeam    = 0
 redTeam     = 1
 
@@ -38,6 +39,9 @@ user_input()
 # Variable used to construct the graph 
 TotalNumberOfNodes = (NumberOfGreenNodes + NumberOfGreyAgents + NumberOfRedAgents + NumberOfBlueAgents)
 
+# A certainty level, above which a green node will vote in the election
+VoteThreshold = (HighCertainty + LowCertainty) / 2
+
 # Create the graph
 G = nx.complete_graph(TotalNumberOfNodes)
 
@@ -55,7 +59,7 @@ for i in G.nodes:
     # Every other node is Green
     G.nodes[i]["Team"] = "Green"
     G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
-    G.nodes[i]["Will Vote"] = False
+    G.nodes[i]["Will Vote"] = (G.nodes[i]["Certainty"] >= VoteThreshold) 
     G.nodes[i]["Ignore Red"] = False
 
 # Build internal representation of the graph
