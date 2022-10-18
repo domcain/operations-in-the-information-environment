@@ -1,6 +1,7 @@
 import random
 import networkx as nx
 import matplotlib.pyplot as plt
+import numpy as np
 
 NumberOfRedAgents = 1
 NumberOfBlueAgents = 1
@@ -49,6 +50,9 @@ G = nx.complete_graph(TotalNumberOfNodes)
 # Assign colours to the graph
 color_map = ['blue' if nodes == blueTeam else 'red' if nodes == redTeam else 'green' for nodes in G]
 
+# Create a normal distribution of tolerance value's to be given to each green node later
+Tolerance = np.random.normal(50, 1, NumberOfGreenNodes)
+
 # Initialise the graph, assign each node the relevent information
 for i in G.nodes:
     # First node is the Blue Agent
@@ -62,7 +66,7 @@ for i in G.nodes:
     G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
     G.nodes[i]["Will Vote"] = (G.nodes[i]["Certainty"] >= VoteThreshold) 
     G.nodes[i]["Ignore Red"] = False
-    G.nodes[i]["Tolerance"] = random.uniform(LowCertainty,HighCertainty)
+    G.nodes[i]["Tolerance"] = Tolerance[i - 2]
 
 # Build internal representation of the graph
 nx.draw(G, node_color=color_map, with_labels=1)
