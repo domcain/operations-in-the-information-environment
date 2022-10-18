@@ -2,8 +2,13 @@
 # from user_input import NumberOfGreenNodes
 
 class AdjNode:
-    def __init__(self, data):
+    def __init__(self, data, WillVote, team, certainty, friends):
         self.vertex = data
+        self.IgnoreRed = False
+        self.WillVote = WillVote
+        self.team = team
+        self.certainty = certainty
+        self.connections = friends
         self.next = None
 
 # A class to represent a graph. A graph is the list of the adjacency lists.
@@ -12,12 +17,8 @@ class Graph:
     def __init__(self, NumberOfGreenNodes):
         self.V = NumberOfGreenNodes
         self.newgraph = [None] * self.V
-        self.willVote = [None] * self.V
-        self.team = [None] * self.V
-        self.certainty = [None] * self.V
-        self.ignoreRed = [False] * self.V
 
-    # Function to add an edge in an undirected graph
+# Function to add an edge in an undirected graph
     def add_edge(self, src, dest):
         # Adding the node to the source node
         node = AdjNode(dest)
