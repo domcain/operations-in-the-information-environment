@@ -60,7 +60,7 @@ class QTrainer:
                 )
             target[idx][torch.argmax(action).item()] = Q_new
 
-        # 2:Q_new = r + y * MAX(next_predicted q value) -> only do if not done
+        # 2: Q_new = r + y * MAX(next_predicted q value) -> only do if not done
         # pred.clone()
         # preds[argmax(action)] = Q_new
         self.optimiser.zero_grad()  # empty gradient for pytorch
