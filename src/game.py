@@ -179,6 +179,13 @@ class AAAI_Game:
         # plt.show()
         pass
 
+
+    def green_interact(self):
+        
+        pass
+
+
+
     def _move(self, action, team):
         if team == blueTeam:
             pass
