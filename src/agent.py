@@ -7,6 +7,9 @@ from collections import deque
 import torch
 from game import AAAI_Game
 from model import Linear_QNet, QTrainer
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -16,8 +19,9 @@ PLAYER = 0
 AI = 1
 redTeam = 1
 blueTeam = 0
-turn = random.randint(PLAYER, AI)
 
+
+turn = PLAYER
 class Agent:
     def __init__(self):
         self.n_games = 0  # max 50
@@ -138,10 +142,10 @@ def train():
 
         if turn == PLAYER:
             if turn == blueTeam:
-                action = get_user_action()
+                action = get_user_action() #get user input 
                 game.play_step(action, blueTeam)
             if turn == redTeam:
-                action = get_user_action()
+                action = get_user_action() #get user input 
                 game.play_step(action, redTeam)
             
             turn += 1
