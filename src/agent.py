@@ -20,6 +20,7 @@ AI = 1
 redTeam = 1
 blueTeam = 0
 
+
 turn = PLAYER
 class Agent:
     def __init__(self):

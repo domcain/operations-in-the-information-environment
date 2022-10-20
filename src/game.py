@@ -18,8 +18,8 @@ class Messages(Enum):  # Direction
     MESSAGE4 = 1.5  # Blue Team's Windmills are the greatest threat in the Green Country to both bald and hairless green people. Media claims fictional 'global warming' is worse.
     MESSAGE5 = 2  # Healthy young child goes to doctor, gets pumped with massive shot of many vaccines, doesn't feel good and changes - AUTISM. Many such cases.
 
-    BLUE_TURN = 6
-    NO_TURN = 1
+    # BLUE_TURN = 6
+    NO_TURN = 0
 
 global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, turn
 PLAYER = 0
@@ -132,6 +132,7 @@ class AAAI_Game:
             # 5. update ui and clock
             self._update_ui()
             # self.clock.tick(SPEED)
+
             # 6. return game over and score
             return reward, game_over, self.score
 
@@ -148,20 +149,18 @@ class AAAI_Game:
         # plt.show()
         pass
 
-
     def _green_interact(self):
         #TODO
         # neighbors = list(self.G.neighbors(0))
         pass
 
-
-   
     def _move(self, action, team):
         
         if team == blueTeam:
             if action == 1:
                 #add multiplier for each message level then affect blue budget
                 pass
+
             round += 1
             # TODO: ADD MATHS
 
