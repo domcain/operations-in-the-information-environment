@@ -7,19 +7,28 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-class Messages(Enum):  # Direction
+class Multiplier(Enum):  # Message Level
     # RIGHT = 1 ""
     # LEFT = 2
     # UP = 3
     # DOWN = 4
-    MESSAGE1 = 1.05  # "Purple leaders are publicly celebrating Blue Teams's reelection. They can't wait to see how flexible the Blue Team will be now."
-    MESSAGE2 = 1.1  # "We should have gotten more of the oil in Syria, and we should have gotten more of the oil in Irag. Dumb Blue Team."
-    MESSAGE3 = 1.25  # Let's take a closer look at that birth certificate. @BlueAgent was described in 2003 as being "born in OrangeLand".
-    MESSAGE4 = 1.5  # Blue Team's Windmills are the greatest threat in the Green Country to both bald and hairless green people. Media claims fictional 'global warming' is worse.
-    MESSAGE5 = 2  # Healthy young child goes to doctor, gets pumped with massive shot of many vaccines, doesn't feel good and changes - AUTISM. Many such cases.
+    MESSAGE1 = 1.01  # "Purple leaders are publicly celebrating Blue Teams's reelection. They can't wait to see how flexible the Blue Team will be now."
+    MESSAGE2 = 1.03  # "We should have gotten more of the oil in Syria, and we should have gotten more of the oil in Irag. Dumb Blue Team."
+    MESSAGE3 = 1.09  # Let's take a closer look at that birth certificate. @BlueAgent was described in 2003 as being "born in OrangeLand".
+    MESSAGE4 = 1.32  # Blue Team's Windmills are the greatest threat in the Green Country to both bald and hairless green people. Media claims fictional 'global warming' is worse.
+    MESSAGE5 = 1.99  # Healthy young child goes to doctor, gets pumped with massive shot of many vaccines, doesn't feel good and changes - AUTISM. Many such cases.
 
     # BLUE_TURN = 6
-    NO_TURN = 0
+    NO_TURN = 1
+
+multiplierDict = {
+    1:1.01,
+    2:1.03,
+    3:1.09,
+    4:1.32,
+    5:1.99
+}
+
 
 global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, turn
 PLAYER = 0
@@ -79,7 +88,7 @@ class AAAI_Game:
         for i in self.G.nodes:
             self.G.nodes[i]["Team"] = "Green"
             self.G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
-            self.G.nodes[i]["Will Vote"] = (self.G.nodes[i]["Certainty"] >= VoteThreshold) 
+            self.G.nodes[i]["Will Vote"] = None
             self.G.nodes[i]["Ignore Red"] = False
             self.G.nodes[i]["Tolerance"] = Tolerance[i]      
                 
@@ -152,20 +161,38 @@ class AAAI_Game:
     def _green_interact(self):
         #TODO
         # neighbors = list(self.G.neighbors(0))
+
         pass
+
+    def _update_node(self, node_id, action, team):
+        node = self.G.nodes[node_id]
+        if node["Certainty"] > HighCertainty:
+            node["Will Vote"] = True
+        
+        if LowCertainty < node["Certainty"] < HighCertainty:
+            node["Will Vote"] = None
+        
+        if node["Certainty"] < LowCertainty:
+            node["Will Vote"] = False
+
+        if team == redTeam:
+            if node["Certainty"] > 0:
+                node["Ignore Red"] = random.random()<(((1 - action) * 10)/node["Tolerance"]) 
+                # TODO Document this
+                # chance of ignoring redTeam
 
     def _move(self, action, team):
         
         if team == blueTeam:
-            if action == 1:
-                #add multiplier for each message level then affect blue budget
-                pass
-
+            for n in self.G.nodes: #add multiplier for each message level then affect blue budget
+                self.G.nodes[n]["Certainty"] * multiplierDict[action]
+                self._update_node(n, multiplierDict[action], blueTeam)
             round += 1
             # TODO: ADD MATHS
 
         if team == redTeam:
-            pass
+            self.G.nodes[n]["Certainty"] * (2 - multiplierDict[action])
+            self._update_node(n, multiplierDict[action], redTeam)
             round += 1
             # TODO: ADD MATHS
 
