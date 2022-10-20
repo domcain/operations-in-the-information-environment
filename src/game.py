@@ -6,21 +6,6 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-
-class Multiplier(Enum):  # Message Level
-    # RIGHT = 1 ""
-    # LEFT = 2
-    # UP = 3
-    # DOWN = 4
-    MESSAGE1 = 1.01  # "Purple leaders are publicly celebrating Blue Teams's reelection. They can't wait to see how flexible the Blue Team will be now."
-    MESSAGE2 = 1.03  # "We should have gotten more of the oil in Syria, and we should have gotten more of the oil in Irag. Dumb Blue Team."
-    MESSAGE3 = 1.09  # Let's take a closer look at that birth certificate. @BlueAgent was described in 2003 as being "born in OrangeLand".
-    MESSAGE4 = 1.32  # Blue Team's Windmills are the greatest threat in the Green Country to both bald and hairless green people. Media claims fictional 'global warming' is worse.
-    MESSAGE5 = 1.99  # Healthy young child goes to doctor, gets pumped with massive shot of many vaccines, doesn't feel good and changes - AUTISM. Many such cases.
-
-    # BLUE_TURN = 6
-    NO_TURN = 1
-
 multiplierDict = {
     1:1.01,
     2:1.03,
@@ -28,7 +13,6 @@ multiplierDict = {
     4:1.32,
     5:1.99
 }
-
 
 global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, turn
 PLAYER = 0
