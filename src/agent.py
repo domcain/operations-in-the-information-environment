@@ -138,10 +138,10 @@ def train():
 
         if turn == PLAYER:
             if turn == blueTeam:
-                action = get_user_action()
+                action = get_user_action() #get user input 
                 game.play_step(action, blueTeam)
             if turn == redTeam:
-                action = get_user_action()
+                action = get_user_action() #get user input 
                 game.play_step(action, redTeam)
             
             turn += 1

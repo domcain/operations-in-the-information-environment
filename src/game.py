@@ -180,7 +180,7 @@ class AAAI_Game:
         pass
 
 
-    def green_interact(self):
+    def _green_interact(self):
         
         pass
 
