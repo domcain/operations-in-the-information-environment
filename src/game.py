@@ -86,8 +86,23 @@ class AAAI_Game:
         return self.G
 
     def reset(self):
+        global PLAYER, AI
         # init game state
-        # TODO RESET GAME WITH NETWORKX
+        self.G = nx.gnp_random_graph(NumberOfGreenNodes, ProbabilityOfConnection)
+ 
+        for i in self.G.nodes:
+            self.G.nodes[i]["Team"] = "Green"
+            self.G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
+            self.G.nodes[i]["Will Vote"] = None
+            self.G.nodes[i]["Ignore Red"] = False
+            self.G.nodes[i]["Tolerance"] = Tolerance[i]  
+        
+        # Build internal representation of the graph.
+        nx.draw(self.G, node_color="Green", with_labels=1)
+
+        # Generate user interface of the graph.
+        plt.show()
+        
         self.score = 0
         self.frame_iteration = 0
         #SET TEAMS
