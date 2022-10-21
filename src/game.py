@@ -140,12 +140,14 @@ class AAAI_Game:
 
         # # # Generate user interface of the graph
         # plt.show()
+        # TODO LOW PRIORITY
         pass
 
     def _green_interact(self):
         #TODO
+        # get green nodes to interact with eachother after a move has been made
         # neighbors = list(self.G.neighbors(0))
-
+        
         pass
 
     def _update_node(self, node_id, action, team):
