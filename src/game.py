@@ -182,24 +182,29 @@ class AAAI_Game:
         
         if node["Certainty"] < LowCertainty:
             node["Will Vote"] = False
-
-        if team == redTeam:
-            if node["Certainty"] > 0:
-                node["Ignore Red"] = random.random()<(((1 - action) * 10)/node["Tolerance"]) 
-                # TODO Document this
-                # chance of ignoring redTeam
+        
+        # From Reds message potency, e.g. 1.x, x*10 becomes the chance of ignoring red team members.
+        IgnoreRedchance = ((1 - action) * 10)
+        # Green nodes only ignore Red when their certainty value is positive (leaning toward voting).
+        if team == redTeam & node["Certainty"] > 0:
+            # If the Green node doesn't tolerate Red's nonsense, they will ignore them. 
+            if IgnoreRedchance >= node["Tolerance"]:
+                node["Ignore Red"] = True
+            # If they tolerate a bit, leave whether they ignore Red to chance (nonsense / tolerance of respective node).
+            else:
+                node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])             
 
     def _move(self, action, team):
         
         if team == blueTeam:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
-                self.G.nodes[n]["Certainty"] * multiplierDict[action]
+                self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * multiplierDict[action]
                 self._update_node(n, multiplierDict[action], blueTeam)
             round += 1
             # TODO: ADD MATHS
 
         if team == redTeam:
-            self.G.nodes[n]["Certainty"] * (2 - multiplierDict[action])
+            self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * (2 - multiplierDict[action])
             self._update_node(n, multiplierDict[action], redTeam)
             round += 1
             # TODO: ADD MATHS
