@@ -36,6 +36,7 @@ AverageTolerance = 50
 ToleranceFloat = np.random.normal(AverageTolerance, StandardTolerance, NumberOfGreenNodes)
 # Above ^^^ creates an array of floats, convert this into an array of integers.
 Tolerance = ToleranceFloat.astype(int)
+TotalVoting = 0
 blueTeam    = 0
 redTeam     = 1
 
@@ -49,15 +50,15 @@ BLACK = (0, 0, 0)
 class AAAI_Game:
     def __init__(self):
         global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty
-        NumberOfGreenNodes = int(input("Enter the size of the Green Team: "))
-        ProbabilityOfConnection = float(input(
-            "Enter the probability of a connection between any given green player: "
-        ))
-        NumberOfGreyAgents = int(input("Enter Number of agents in the Grey Team: "))
-        RedSpyProportion = float(input("Enter the proportion of Red Spies within the Grey Team: "))
-        LowCertainty,HighCertainty = [float(x) for x in input(
-            "Enter the Certainty interval of the Green Team. (e.g. [-0.1,0.1] or [-0.5,0.7]): "
-        ).split(',')]
+        # NumberOfGreenNodes = int(input("Enter the size of the Green Team: "))
+        # ProbabilityOfConnection = float(input(
+        #     "Enter the probability of a connection between any given green player: "
+        # ))
+        # NumberOfGreyAgents = int(input("Enter Number of agents in the Grey Team: "))
+        # RedSpyProportion = float(input("Enter the proportion of Red Spies within the Grey Team: "))
+        # LowCertainty,HighCertainty = [float(x) for x in input(
+        #     "Enter the Certainty interval of the Green Team. (e.g. [-0.1,0.1] or [-0.5,0.7]): "
+        # ).split(',')]
         print(
             "Size of the Green Team: " + str(NumberOfGreenNodes) + "\n",
             "Probability of a connection between any given green player: " + str(ProbabilityOfConnection) + "\n",
@@ -76,6 +77,7 @@ class AAAI_Game:
             self.G.nodes[i]["Ignore Red"] = False
             self.G.nodes[i]["Tolerance"] = Tolerance[i]      
                 
+        self.update_graph(self.G, TotalVoting)
         # Build internal representation of the graph.
         nx.draw(self.G, node_color="Green", with_labels=1)
 
@@ -84,6 +86,14 @@ class AAAI_Game:
     
     def access_graph(self, graph):
         return self.G
+
+    def update_graph(self, graph, TotalVoting): #Set totalVoting for state access
+        totalVoting = []
+        for (p, d) in graph.nodes(data=True):
+            if d['Certainty'] >= HighCertainty:
+                totalVoting.append(p)
+        TotalVoting = len(totalVoting)
+        print("TotalVoting @ start: ", TotalVoting)
 
     def reset(self):
         global PLAYER, AI
@@ -119,10 +129,13 @@ class AAAI_Game:
         # 2. Play move
         if turn == PLAYER:
             self._move(action, PLAYER)
+            game_over = False
             if self.round_limit():
                 game_over = True
                 return game_over, self.score
             self._update_ui()
+            # self.update_graph(self.G)
+            return game_over
         else:
             self._move(action, AI)  # Choose move (update the head)
 
@@ -139,6 +152,7 @@ class AAAI_Game:
 
             # 5. update ui and clock
             self._update_ui()
+            # self.update_graph(self.G)
             # self.clock.tick(SPEED)
 
             # 6. return game over and score
@@ -160,6 +174,7 @@ class AAAI_Game:
     
     # Get green nodes to interact with each other.
     def _green_interact(self):
+
         # Iterate through the array of green nodes
         for i in self.G.nodes(data="Certainty"):
             # Who is the current nodes neighbours?
@@ -172,10 +187,11 @@ class AAAI_Game:
                     # current certainty, and the neighbouring nodes certainty.
                     self.G.nodes[i]["Certainty"] = (self.G.nodes[i]["Certainty"] + self.G.nodes[j]["Certainty"]) / 2 
 
-    def _update_node(self, node_id, action, team):
+def _update_node(self, node_id, action, team):
         node = self.G.nodes[node_id]
         if node["Certainty"] > HighCertainty:
             node["Will Vote"] = True
+            TotalVoting += 1 
         
         if LowCertainty < node["Certainty"] < HighCertainty:
             node["Will Vote"] = None
@@ -200,13 +216,13 @@ class AAAI_Game:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * multiplierDict[action]
                 self._update_node(n, multiplierDict[action], blueTeam)
-            round += 1
+            # round += 1
             # TODO: ADD MATHS
 
         if team == redTeam:
             self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * (2 - multiplierDict[action])
             self._update_node(n, multiplierDict[action], redTeam)
-            round += 1
+            # round += 1
             # TODO: ADD MATHS
 
     # def _get_reward(self):

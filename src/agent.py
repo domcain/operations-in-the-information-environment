@@ -29,12 +29,11 @@ class Agent:
         self.gamma = 0.9  # discount rate, smaller than 1
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when memory is full
         self.model = Linear_QNet(
-            11, 256, 7 #11 will be state size or number of nodes in graph G
-        )  # first is size of state, output is 3 (three different numbers in action). play with hidden.
+            1, 256, 7 #11 will be state size or number of nodes in graph G
+        )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):  # in video 11 states/values
-        # add in dangers and stuff
         pass
         # will return an array of state values
 
@@ -143,7 +142,7 @@ def train():
         if turn == PLAYER:
             if turn == blueTeam:
                 action = get_user_action() #get user input 
-                game.play_step(action, blueTeam)
+                done = game.play_step(action, blueTeam)
             if turn == redTeam:
                 action = get_user_action() #get user input 
                 game.play_step(action, redTeam)
