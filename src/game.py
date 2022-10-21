@@ -161,11 +161,10 @@ class AAAI_Game:
         if node["Certainty"] < LowCertainty:
             node["Will Vote"] = False
 
-        if team == redTeam:
-            if node["Certainty"] > 0:
-                node["Ignore Red"] = random.random()<(((1 - action) * 10)/node["Tolerance"]) 
-                # TODO Document this
-                # chance of ignoring redTeam
+        if team == redTeam & node["Certainty"] > 0:
+            node["Ignore Red"] = random.random()<(((1 - action) * 10)/node["Tolerance"]) 
+            # TODO Document this
+            # chance of ignoring redTeam
 
     def _move(self, action, team):
         
