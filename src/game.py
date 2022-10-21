@@ -157,13 +157,20 @@ class AAAI_Game:
         # plt.show()
         # TODO LOW PRIORITY
         pass
-
+    
+    # Get green nodes to interact with each other.
     def _green_interact(self):
-        #TODO
-        # get green nodes to interact with eachother after a move has been made
-        # neighbors = list(self.G.neighbors(0))
-        
-        pass
+        # Iterate through the array of green nodes
+        for i in self.G.nodes(data="Certainty"):
+            # Who is the current nodes neighbours?
+            neighbors = nx.neighbors(self.G, i)
+            # Iterate through the current nodes neighbours
+            for j in neighbors:
+                # Neighbors haven't already interacted
+                if neighbors[j] > i:
+                    # Set the nodes certainty to the average between its
+                    # current certainty, and the neighbouring nodes certainty.
+                    self.G.nodes[i]["Certainty"] = (self.G.nodes[i]["Certainty"] + self.G.nodes[j]["Certainty"]) / 2 
 
     def _update_node(self, node_id, action, team):
         node = self.G.nodes[node_id]
