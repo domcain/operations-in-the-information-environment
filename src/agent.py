@@ -34,7 +34,9 @@ class Agent:
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):  # in video 11 states/values
-        pass
+        state = game.total_voting #returns the amount of green nodes voting
+        return np.array(state, dtype=int)
+
         # will return an array of state values
 
     def remember(self, state, action, reward, next_state, game_over):
@@ -85,8 +87,19 @@ class Agent:
 def display_message(number, team):
     if team == blueTeam:
         if number == 0:
-            print("\n")
-            #TODO add messages for blueTeam
+            print("Just in from the blueTeam: '.'\n")
+        if number == 1:
+            print("Just in from the blueTeam: '.'\n")
+        if number == 2:
+            print("Just in from the blueTeam: '.'\n")
+        if number == 3:
+            print("Just in from the blueTeam: '.'\n")
+        if number == 4:
+            print("Just in from the blueTeam: '.'\n")
+        if number == 5:
+            print("Blue Team played a SPY '.'\n")
+        if number == 6:
+            print("Blue Team skipped a turn '.'\n")
 
     if team == redTeam:
         if number == 0:
