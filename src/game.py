@@ -14,13 +14,12 @@ multiplierDict = {
     5:1.99
 }
 
-global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, turn
+# global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, turn
 PLAYER = 0
 AI = 1
 
-NumberOfRedAgents = 1
-NumberOfBlueAgents = 1
-NumberOfGreenNodes = 20
+# turn = random.randint(PLAYER, AI)
+NumberOfNodes = 20
 ProbabilityOfConnection = 0.3
 NumberOfGreyAgents = 5
 RedSpyProportion = 0.5
@@ -31,10 +30,11 @@ VoteThreshold = (HighCertainty + LowCertainty) / 2
 StandardTolerance = 10
 AverageTolerance = 50
 # Create a normal distribution of tolerance value's to be given to each green node later.
-ToleranceFloat = np.random.normal(AverageTolerance, StandardTolerance, NumberOfGreenNodes)
+ToleranceFloat = np.random.normal(AverageTolerance, StandardTolerance, NumberOfNodes)
 # Above ^^^ creates an array of floats, convert this into an array of integers.
 Tolerance = ToleranceFloat.astype(int)
 TotalVoting = 0
+TotalNotVoting = 0
 blueTeam    = 0
 redTeam     = 1
 
@@ -51,8 +51,9 @@ BLACK = (0, 0, 0)
 
 class AAAI_Game:
     def __init__(self):
-        global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty
-        # NumberOfGreenNodes = int(input("Enter the size of the Green Team: "))
+        global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold
+        self.NumberOfNodes = NumberOfNodes
+        # NumberOfNodes = int(input("Enter the size of the Green Team: "))
         # ProbabilityOfConnection = float(input(
         #     "Enter the probability of a connection between any given green player: "
         # ))
@@ -61,25 +62,25 @@ class AAAI_Game:
         # LowCertainty,HighCertainty = [float(x) for x in input(
         #     "Enter the Certainty interval of the Green Team. (e.g. [-0.1,0.1] or [-0.5,0.7]): "
         # ).split(',')]
+        # VoteThreshold = (HighCertainty + LowCertainty) / 2
         print(
-            "Size of the Green Team: " + str(NumberOfGreenNodes) + "\n",
+            "Size of the Green Team: " + str(NumberOfNodes) + "\n",
             "Probability of a connection between any given green player: " + str(ProbabilityOfConnection) + "\n",
             "Number of agents in the Grey Team: " + str(NumberOfGreyAgents) + "\n",
             "Proportion of Red Spies within the Grey Team: " + str(RedSpyProportion) + "\n",
             "Certainty interval of the Green Team: " + str(LowCertainty) + ', ' + str(HighCertainty) + "\n"
         )
         # Create the graph.
-        self.G = nx.gnp_random_graph(NumberOfGreenNodes, ProbabilityOfConnection)
+        self.G = nx.gnp_random_graph(NumberOfNodes, ProbabilityOfConnection)
 
         # Initialise the graph, assign each node the relevent information.
         for i in self.G.nodes:
             self.G.nodes[i]["Team"] = "Green"
             self.G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
-            self.G.nodes[i]["Will Vote"] = None
+            self.G.nodes[i]["Will Vote"] = None # add update_node function
             self.G.nodes[i]["Ignore Red"] = False
-            self.G.nodes[i]["Tolerance"] = Tolerance[i]      
-                
-        self.total_voting(self.G)
+            self.G.nodes[i]["Tolerance"] = Tolerance[i]                      
+        self._update_will_vote_values(self.G)
 
         # Build internal representation of the graph.
         nx.draw(self.G, node_color="Green", with_labels=1)
@@ -90,20 +91,27 @@ class AAAI_Game:
     def access_graph(self, graph):
         return self.G
 
-    def total_voting(self, graph): #Set totalVoting for state access
-        tV = []
-        global TotalVoting
+    def _update_will_vote_values(self, graph): #Creates/Updates the voting/not voting arrays for every node in the graph
+        NodesVoting = [] # A list of nodes that are going to vote
+        NodesNotVoting = [] # A list of nodes that are NOT going to vote
+        # global TotalVoting, TotalNotVoting
         for (p, d) in graph.nodes(data=True):
-            if d['Certainty'] >= HighCertainty:
-                tV.append(p)
-        TotalVoting = len(tV)
-        print("TotalVoting @ start: ", TotalVoting)
-        return TotalVoting
+            if d['Certainty'] >= VoteThreshold: # If the node's certainty is higher or equal to the midpoint between the certainty intervals
+                NodesVoting.append(True)
+                d["Will Vote"] = True
+            if d['Certainty'] < VoteThreshold: # If the node's certainty is lower than the midpoint between the certainty intervals
+                NodesNotVoting.append(False)
+                d["Will Vote"] = False
+        # TotalVoting = len(NodesVoting)
+        # TotalNotVoting = len(NodesNotVoting)
+        # print("TotalVoting @ start: ", TotalVoting)
+        # print("TotalNotVoting @ start: ", TotalNotVoting)
+        return NodesVoting, NodesNotVoting
 
     def reset(self):
         global PLAYER, AI, turn
         # init game state
-        self.G = nx.gnp_random_graph(NumberOfGreenNodes, ProbabilityOfConnection)
+        self.G = nx.gnp_random_graph(NumberOfNodes, ProbabilityOfConnection)
  
         for i in self.G.nodes:
             self.G.nodes[i]["Team"] = "Green"
@@ -188,19 +196,22 @@ class AAAI_Game:
                     # Set the nodes certainty to the average between its
                     # current certainty, and the neighbouring nodes certainty.
                     self.G.nodes[i]["Certainty"] = (self.G.nodes[i]["Certainty"] + self.G.nodes[j]["Certainty"]) / 2 
+                    #TODO: UPDATE NODES HERE BISH
 
-    def _update_node(self, node_id, action, team):
+    def _update_voting_totals(self, node_id, PrevWillVote, action, team):
         global TotalVoting
+        global TotalNotVoting
         node = self.G.nodes[node_id]
-        if node["Certainty"] > HighCertainty:
-            node["Will Vote"] = True
+        if node["Will Vote"] and PrevWillVote != node["Will Vote"]:
             TotalVoting += 1 
         
-        if LowCertainty < node["Certainty"] < HighCertainty:
-            node["Will Vote"] = None
+        if node["Will Vote"] == False and PrevWillVote != node["Will Vote"]:
+            TotalVoting -= 1
+
         
         if node["Certainty"] < LowCertainty:
-            node["Will Vote"] = False
+            TotalNotVoting += 1
+        
         
         # From Reds message potency, e.g. 1.x, x*10 becomes the chance of ignoring red team members.
         IgnoreRedchance = ((1 - action) * 10)
@@ -216,43 +227,50 @@ class AAAI_Game:
     def _move(self, action, team):
         global BudgetAUD, CurrentBalance, round
         if team == blueTeam & action <= 5 & CurrentBalance > 0:
-            # Add multiplier for each message level then affect blue budget
-            for n in self.G.nodes:
+            for n in self.G.nodes: #add multiplier for each message level then affect blue budget
+                print(" self.G.nodes[n]: ",  self.G.nodes[n]["Certainty"])
+                PrevWillVote = self.G.nodes[n]["Will Vote"]
                 self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * multiplierDict[action]
-                self._update_node(n, multiplierDict[action], blueTeam)
-            # Subtract the cost of the move from the budget.
-            CurrentBalance -= BudgetAUD*(multiplierDict[action]-1)
-            round += 1
+                self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
+                # Subtract the cost of the move from the budget.
+                CurrentBalance -= BudgetAUD*(multiplierDict[action]-1)
+                # round += 1
         # Intrduce a foreign power into the game.   
-        elif action == 6:
+        elif team == blueTeam & action == 6:
             # introduce_grey_agent()
             round += 1
         # Skip blue teams turn.
-        elif action == 7:
+        elif team == blueTeam & action == 7:
             round += 1
-            # TODO: ADD MATHS
+        # TODO: ADD MATHS
+                  
 
         if team == redTeam:
-            self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * (2 - multiplierDict[action])
-            self._update_node(n, multiplierDict[action], redTeam)
-            round += 1
-            # TODO: ADD MATHS
+            for n in self.G.nodes: #add multiplier for each message level then affect blue budget
+                PrevWillVote = self.G.nodes[n]["Will Vote"]
+                self.G.nodes[n]["Certainty"] = (self.G.nodes[n]["Certainty"]) * (2 - multiplierDict[action])
+                self._update_voting_totals(n, PrevWillVote, multiplierDict[action], redTeam)
+                # round += 1
+                # TODO: ADD MATHS
 
-    def _get_reward(self, old_reward,team):
+    def _get_reward(self, old_TeamVoting, team):
         reward = 0
-        if old_reward == curr_TeamVoting: #no change
-                reward = 0
+        # global TotalVoting
+        # curr_TeamVoting = TotalVoting
+        # if old_TeamVoting == curr_TeamVoting: #no change
+        #         reward = 0
 
-        if team == blueTeam:
-            if old_reward > curr_TeamVoting: #define this variable 
-                reward = 10
-            else:
-                reward = 0
-        if team == redTeam:
-            if old_reward < curr_TeamVoting: #set this variable 
-                reward = 10
-            else:
-                reward = 0            
-            
+        # if team == blueTeam:
+        #     if old_TeamVoting > curr_TeamVoting: #define this variable 
+        #         reward = 10 #  percentage increase in people voting is the multiplier
+        #     if old_TeamVoting > curr_TeamVoting:
+        #         reward = -10 * reward # percentage decrease in people voting is the multiplier
+        # if team == redTeam:
+        #     if old_TeamNotVoting > curr_TeamNotVoting: #define this variable 
+        #         reward = 10 * X # percentage increase in people voting is the multiplier
+        #     if old_TeamNotVoting > curr_TeamNotVoting:
+        #         reward = -10 * X # percentage decrease in people voting is the multiplier
+        # 
+        #         
 
         return reward

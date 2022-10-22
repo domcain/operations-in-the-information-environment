@@ -23,20 +23,23 @@ blueTeam = 0
 
 turn = PLAYER
 class Agent:
-    def __init__(self):
+    def __init__(self, game):
         self.n_games = 0  # max 50
         self.epsilon = 0  # randomness level
         self.gamma = 0.9  # discount rate, smaller than 1
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when memory is full
         self.model = Linear_QNet(
-            1, 256, 7 #11 will be state size or number of nodes in graph G
+            game.NumberOfNodes, 256, 7 #11 will be state size or number of nodes in graph G
         )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):  # in video 11 states/values
-        state = game.total_voting #returns the amount of green nodes voting
-        return np.array(state, dtype=int)
-
+        WillVote, WontVote = game._update_will_vote_values(game.G) #returns the amount of green nodes voting
+        print("Voting Array: ", WillVote)
+        print("Not Voting Array: ", WontVote)
+        state = np.concatenate((WillVote,WontVote))
+        print("state: ", state)
+        return np.array(state,dtype=int)
         # will return an array of state values
 
     def remember(self, state, action, reward, next_state, game_over):
@@ -127,8 +130,8 @@ def train():
     plot_mean_scores = []  # average scores
     total_score = 0
     record = 0
-    agent = Agent()
     game = AAAI_Game()
+    agent = Agent(game)
     # game.__init__()
     turn = PLAYER
     while True:  # training loop
