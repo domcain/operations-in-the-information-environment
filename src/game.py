@@ -77,7 +77,7 @@ class AAAI_Game:
             self.G.nodes[i]["Ignore Red"] = False
             self.G.nodes[i]["Tolerance"] = Tolerance[i]      
                 
-        self.update_graph(self.G, TotalVoting)
+        self.total_voting(self.G)
         # Build internal representation of the graph.
         nx.draw(self.G, node_color="Green", with_labels=1)
 
@@ -87,13 +87,15 @@ class AAAI_Game:
     def access_graph(self, graph):
         return self.G
 
-    def update_graph(self, graph, TotalVoting): #Set totalVoting for state access
-        totalVoting = []
+    def total_voting(self, graph): #Set totalVoting for state access
+        tV = []
+        global TotalVoting
         for (p, d) in graph.nodes(data=True):
             if d['Certainty'] >= HighCertainty:
-                totalVoting.append(p)
-        TotalVoting = len(totalVoting)
+                tV.append(p)
+        TotalVoting = len(tV)
         print("TotalVoting @ start: ", TotalVoting)
+        return TotalVoting
 
     def reset(self):
         global PLAYER, AI
@@ -187,7 +189,8 @@ class AAAI_Game:
                     # current certainty, and the neighbouring nodes certainty.
                     self.G.nodes[i]["Certainty"] = (self.G.nodes[i]["Certainty"] + self.G.nodes[j]["Certainty"]) / 2 
 
-def _update_node(self, node_id, action, team):
+    def _update_node(self, node_id, action, team):
+        global TotalVoting
         node = self.G.nodes[node_id]
         if node["Certainty"] > HighCertainty:
             node["Will Vote"] = True
@@ -202,7 +205,7 @@ def _update_node(self, node_id, action, team):
         # From Reds message potency, e.g. 1.x, x*10 becomes the chance of ignoring red team members.
         IgnoreRedchance = ((1 - action) * 10)
         # Green nodes only ignore Red when their certainty value is positive (leaning toward voting).
-        if team == redTeam & node["Certainty"] > 0:
+        if team == redTeam and node["Certainty"] > 0.0:
             # If the Green node doesn't tolerate Red's nonsense, they will ignore them. 
             if IgnoreRedchance >= node["Tolerance"]:
                 node["Ignore Red"] = True
@@ -225,4 +228,21 @@ def _update_node(self, node_id, action, team):
             # round += 1
             # TODO: ADD MATHS
 
-    # def _get_reward(self):
+    def _get_reward(self, team):
+        reward = 0
+        if old_TeamVoting == curr_TeamVoting: #no change
+                reward = 0
+
+        if team == blueTeam:
+            if old_TeamVoting > curr_TeamVoting: #define this variable 
+                reward = 10
+            else:
+                reward = 0
+        if team == redTeam:
+            if old_TeamVoting < curr_TeamVoting: #set this variable 
+                reward = 10
+            else:
+                reward = 0            
+            
+
+        return reward

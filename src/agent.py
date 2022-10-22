@@ -34,7 +34,8 @@ class Agent:
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):  # in video 11 states/values
-        pass
+        state = game.total_voting #returns the amount of green nodes voting
+        return np.array(state, dtype=int)
         # will return an array of state values
 
     def remember(self, state, action, reward, next_state, game_over):
