@@ -151,7 +151,11 @@ class AAAI_Game:
             reward = self._get_reward()
 
             # 5. update ui and clock
+            
+            # This call loads the new data and runs the GUI's event loop
+            # plt.pause(0.05)
             self._update_ui()
+            
             # self.update_graph(self.G)
             # self.clock.tick(SPEED)
 
@@ -164,9 +168,25 @@ class AAAI_Game:
         return False
 
     def _update_ui(self):
+        global TotalVoting
         # Build internal representation of the graph
         # nx.draw(G, node_color=color_map, with_labels=1)
+        
+        # Update node colour based upon their opinion
+        for i in self.G.nodes:
+            if self.G.nodes[i]["Will Vote"] == True:
+                self.G.nodes[i]["Team"] = "Blue"
+            if self.G.nodes[i]["Will Vote"] is None:
+                self.G.nodes[i]["Team"] = "Green"
+            if self.G.nodes[i]["Will Vote"] == False:
+                self.G.nodes[i]["Team"] = "Red"
+        # Show whose turn it is.
+        plt.text(0, 0, turn, fontsize = 18, color = 'Black')
+        plt.text(3, 0, "'s turn", fontsize = 18, color = 'Black')
 
+        plt.text(0, 1, 'Agregate Voting:', fontsize = 18, color = 'Black')
+        plt.text(3, 0, TotalVoting, fontsize = 18, color = 'Black')
+        
         # # # Generate user interface of the graph
         # plt.show()
         # TODO LOW PRIORITY
@@ -187,7 +207,7 @@ class AAAI_Game:
                     # current certainty, and the neighbouring nodes certainty.
                     self.G.nodes[i]["Certainty"] = (self.G.nodes[i]["Certainty"] + self.G.nodes[j]["Certainty"]) / 2 
 
-def _update_node(self, node_id, action, team):
+    def _update_node(self, node_id, action, team):
         node = self.G.nodes[node_id]
         if node["Certainty"] > HighCertainty:
             node["Will Vote"] = True
