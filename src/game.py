@@ -78,6 +78,7 @@ class AAAI_Game:
             self.G.nodes[i]["Tolerance"] = Tolerance[i]      
                 
         self.total_voting(self.G)
+
         # Build internal representation of the graph.
         nx.draw(self.G, node_color="Green", with_labels=1)
 

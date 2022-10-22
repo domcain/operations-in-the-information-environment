@@ -36,6 +36,7 @@ class Agent:
     def get_state(self, game):  # in video 11 states/values
         state = game.total_voting #returns the amount of green nodes voting
         return np.array(state, dtype=int)
+
         # will return an array of state values
 
     def remember(self, state, action, reward, next_state, game_over):
