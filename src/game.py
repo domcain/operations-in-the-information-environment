@@ -18,8 +18,6 @@ global NumberOfGreenNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyPr
 PLAYER = 0
 AI = 1
 
-# turn = random.randint(PLAYER, AI)
-
 NumberOfRedAgents = 1
 NumberOfBlueAgents = 1
 NumberOfGreenNodes = 20
@@ -39,6 +37,10 @@ Tolerance = ToleranceFloat.astype(int)
 TotalVoting = 0
 blueTeam    = 0
 redTeam     = 1
+
+# Australian Liberal/Labour expenses on political advertisement in 2022
+StartingBudgetAUD = 250000
+CurrentBalance = StartingBudgetAUD
 
 # rgb colors
 WHITE = (255, 255, 255)
@@ -76,8 +78,8 @@ class AAAI_Game:
             self.G.nodes[i]["Will Vote"] = None
             self.G.nodes[i]["Ignore Red"] = False
             self.G.nodes[i]["Tolerance"] = Tolerance[i]      
-                
-        self.update_graph(self.G, TotalVoting)
+            
+        self.update_graph(self.G, TotalVoting)   
         # Build internal representation of the graph.
         nx.draw(self.G, node_color="Green", with_labels=1)
 
@@ -96,7 +98,7 @@ class AAAI_Game:
         print("TotalVoting @ start: ", TotalVoting)
 
     def reset(self):
-        global PLAYER, AI
+        global PLAYER, AI, turn
         # init game state
         self.G = nx.gnp_random_graph(NumberOfGreenNodes, ProbabilityOfConnection)
  
@@ -174,7 +176,6 @@ class AAAI_Game:
     
     # Get green nodes to interact with each other.
     def _green_interact(self):
-
         # Iterate through the array of green nodes
         for i in self.G.nodes(data="Certainty"):
             # Who is the current nodes neighbours?
@@ -187,7 +188,7 @@ class AAAI_Game:
                     # current certainty, and the neighbouring nodes certainty.
                     self.G.nodes[i]["Certainty"] = (self.G.nodes[i]["Certainty"] + self.G.nodes[j]["Certainty"]) / 2 
 
-def _update_node(self, node_id, action, team):
+    def _update_node(self, node_id, action, team):
         node = self.G.nodes[node_id]
         if node["Certainty"] > HighCertainty:
             node["Will Vote"] = True
@@ -211,18 +212,28 @@ def _update_node(self, node_id, action, team):
                 node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])             
 
     def _move(self, action, team):
-        
-        if team == blueTeam:
-            for n in self.G.nodes: #add multiplier for each message level then affect blue budget
+        global BudgetAUD, CurrentBalance, round
+        if team == blueTeam & action <= 5 & CurrentBalance > 0:
+            # Add multiplier for each message level then affect blue budget
+            for n in self.G.nodes:
                 self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * multiplierDict[action]
                 self._update_node(n, multiplierDict[action], blueTeam)
-            # round += 1
+            # Subtract the cost of the move from the budget.
+            CurrentBalance -= BudgetAUD*(multiplierDict[action]-1)
+            round += 1
+        # Intrduce a foreign power into the game.   
+        elif action == 6:
+            # introduce_grey_agent()
+            round += 1
+        # Skip blue teams turn.
+        elif action == 7:
+            round += 1
             # TODO: ADD MATHS
 
         if team == redTeam:
             self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * (2 - multiplierDict[action])
             self._update_node(n, multiplierDict[action], redTeam)
-            # round += 1
+            round += 1
             # TODO: ADD MATHS
 
     # def _get_reward(self):
