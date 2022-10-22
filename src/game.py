@@ -69,9 +69,12 @@ class AAAI_Game:
         # Create the graph.
         self.G = nx.gnp_random_graph(NumberOfGreenNodes, ProbabilityOfConnection)
 
+        # Assign colours to the graph
+        color_map = ['blue' if nodes["Will Vote"] == True else 'red' if nodes["Will Vote"] == False else 'green' for nodes in self.G]
+
         # Initialise the graph, assign each node the relevent information.
         for i in self.G.nodes:
-            self.G.nodes[i]["Team"] = "Green"
+            # self.G.nodes[i]["Team"] = "Green"
             self.G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
             self.G.nodes[i]["Will Vote"] = None
             self.G.nodes[i]["Ignore Red"] = False
@@ -79,7 +82,7 @@ class AAAI_Game:
                 
         self.update_graph(self.G, TotalVoting)
         # Build internal representation of the graph.
-        nx.draw(self.G, node_color="Green", with_labels=1)
+        nx.draw(self.G, node_color=color_map, with_labels=1)
 
         # Generate user interface of the graph.
         plt.show()
@@ -173,13 +176,10 @@ class AAAI_Game:
         # nx.draw(G, node_color=color_map, with_labels=1)
         
         # Update node colour based upon their opinion
-        for i in self.G.nodes:
-            if self.G.nodes[i]["Will Vote"] == True:
-                self.G.nodes[i]["Team"] = "Blue"
-            if self.G.nodes[i]["Will Vote"] is None:
-                self.G.nodes[i]["Team"] = "Green"
-            if self.G.nodes[i]["Will Vote"] == False:
-                self.G.nodes[i]["Team"] = "Red"
+        # Assign colours to the graph
+        color_map = ['blue' if nodes == blueTeam else 'red' if nodes == redTeam else 'green' for nodes in G]
+        nx.draw(self.G, node_color=color_map, with_labels=1)
+        
         # Show whose turn it is.
         plt.text(0, 0, turn, fontsize = 18, color = 'Black')
         plt.text(3, 0, "'s turn", fontsize = 18, color = 'Black')
