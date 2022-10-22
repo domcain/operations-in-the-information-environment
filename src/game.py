@@ -38,6 +38,9 @@ TotalNotVoting = 0
 blueTeam    = 0
 redTeam     = 1
 
+# Australian Liberal/Labour expenses on political advertisement in 2022
+StartingBudgetAUD = 250000
+CurrentBalance = StartingBudgetAUD
 
 # rgb colors
 WHITE = (255, 255, 255)
@@ -106,7 +109,7 @@ class AAAI_Game:
         return NodesVoting, NodesNotVoting
 
     def reset(self):
-        global PLAYER, AI
+        global PLAYER, AI, turn
         # init game state
         self.G = nx.gnp_random_graph(NumberOfNodes, ProbabilityOfConnection)
  
@@ -182,7 +185,6 @@ class AAAI_Game:
     
     # Get green nodes to interact with each other.
     def _green_interact(self):
-
         # Iterate through the array of green nodes
         for i in self.G.nodes(data="Certainty"):
             # Who is the current nodes neighbours?
@@ -223,15 +225,25 @@ class AAAI_Game:
                 node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])             
 
     def _move(self, action, team):
-        
-        if team == blueTeam:
+        global BudgetAUD, CurrentBalance, round
+        if team == blueTeam & action <= 5 & CurrentBalance > 0:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 print(" self.G.nodes[n]: ",  self.G.nodes[n]["Certainty"])
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
                 self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * multiplierDict[action]
                 self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
-            # round += 1
-            # TODO: ADD MATHS
+                # Subtract the cost of the move from the budget.
+                CurrentBalance -= BudgetAUD*(multiplierDict[action]-1)
+                # round += 1
+        # Intrduce a foreign power into the game.   
+        elif team == blueTeam & action == 6:
+            # introduce_grey_agent()
+            round += 1
+        # Skip blue teams turn.
+        elif team == blueTeam & action == 7:
+            round += 1
+        # TODO: ADD MATHS
+                  
 
         if team == redTeam:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
