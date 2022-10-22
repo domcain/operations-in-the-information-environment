@@ -140,18 +140,16 @@ class AAAI_Game:
             return game_over
         else:
             self._move(action, AI)  # Choose move (update the head)
-
             # 3. check if game over
-            reward = 0
             game_over = False
             if self.round_limit():
                 game_over = True
                 return game_over, self.score
 
             # 4. place new food or just move
-
-            reward = self._get_reward()
-
+            old_reward = reward
+            reward = self._get_reward(old_reward,turn)
+            
             # 5. update ui and clock
             self._update_ui()
             # self.update_graph(self.G)
@@ -228,18 +226,18 @@ class AAAI_Game:
             # round += 1
             # TODO: ADD MATHS
 
-    def _get_reward(self, team):
+    def _get_reward(self, old_reward,team):
         reward = 0
-        if old_TeamVoting == curr_TeamVoting: #no change
+        if old_reward == curr_TeamVoting: #no change
                 reward = 0
 
         if team == blueTeam:
-            if old_TeamVoting > curr_TeamVoting: #define this variable 
+            if old_reward > curr_TeamVoting: #define this variable 
                 reward = 10
             else:
                 reward = 0
         if team == redTeam:
-            if old_TeamVoting < curr_TeamVoting: #set this variable 
+            if old_reward < curr_TeamVoting: #set this variable 
                 reward = 10
             else:
                 reward = 0            
