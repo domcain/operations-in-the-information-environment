@@ -5,7 +5,7 @@ import os
 import numpy as np
 from collections import deque
 import torch
-from game import AAAI_Game
+from game import AAAI_Game, NumberOfGreyAgents
 from model import Linear_QNet, QTrainer
 import numpy as np
 import networkx as nx
@@ -140,12 +140,19 @@ def get_user_action():
                 print("That wasn't an integer :(\n")
         return level-1
     if PLAYER == blueTeam:
-        while 1 > level or 7 < level:
+        print("Enter a message potency level between 1 - 5\n","     OR      \n", "Type 6 to inject a GREY agent\n","     OR      \n","Type 7 to Skip a turn: ")
+        while True:
             try:
-                print("Enter a message potency level between 1 - 5\n","     OR      \n", "Type 6 to inject a GREY agent\n","     OR      \n","Type 7 to Skip a turn: ")
+                
                 level = int(input())
+                if level == 6 and NumberOfGreyAgents == 0:
+                    print("Maximum number of grey agents have been played, try another move: \n")
+                    continue
+                if level >= 1 and level <= 7:
+                    break
             except ValueError:
                 print("That wasn't an integer :(\n")
+            
         return level-1
 
 def train():

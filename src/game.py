@@ -34,11 +34,11 @@ TotalNotVoting = 0                                  #
 blueTeam    = 0                                     #
 redTeam     = 1                                     #
 multiplierDict = {                                  # Dictionary containing each move and it's corresponding potency value
-    0:1.01,
-    1:1.03,
-    2:1.09,
-    3:1.32,
-    4:1.99
+    0:0.01,
+    1:0.03,
+    2:0.09,
+    3:0.32,
+    4:0.99
 }
 
 reward = 0
@@ -61,6 +61,7 @@ class AAAI_Game:
     def __init__(self):
         global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold
         self.NumberOfNodes = NumberOfNodes
+        self.NumberOfNodes = NumberOfGreyAgents
         self.score = 0
 
         # NumberOfNodes = int(input("Enter the size of the Green Team: "))
@@ -186,7 +187,7 @@ class AAAI_Game:
 
             # 4. place new food or just move
             # old_reward = reward
-            reward = self._get_reward(old_TeamVoting, old_TeamNotVoting,turn)
+            reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn)
             
             # 5. update ui and clock
             self._update_ui()
@@ -286,12 +287,17 @@ class AAAI_Game:
         # Intrduce a foreign power into the game.   
         elif team == blueTeam and action == 5:
             # TODO: introduce_grey_agent()
-            pass
+            grey_type = random.randint(PLAYER, AI)
+            if grey_type == redTeam:
+                grey_action = random.randint(0,4)
+            if grey_type == blueTeam:
+                grey_action = random.randint(0,6)
+            self.play_step(grey_action, grey_type)
+            
         # Skip blue teams turn.
         elif team == blueTeam and action == 6:
             pass
                   
-
         if team == redTeam:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
