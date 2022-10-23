@@ -187,16 +187,18 @@ class AAAI_Game:
     def _green_interact(self):
         # Iterate through the array of green nodes
         for i in self.G.nodes(data="Certainty"):
-            # Who is the current nodes neighbours?
+            # Who are the current nodes neighbours?
             neighbors = nx.neighbors(self.G, i)
-            # Iterate through the current nodes neighbours
+            # Iterate through the neighbours this node hasn't interacted with yet
             for j in neighbors:
-                # Neighbors haven't already interacted
                 if neighbors[j] > i:
-                    # Set the nodes certainty to the average between its
-                    # current certainty, and the neighbouring nodes certainty.
-                    self.G.nodes[i]["Certainty"] = (self.G.nodes[i]["Certainty"] + self.G.nodes[j]["Certainty"]) / 2 
-                    #TODO: UPDATE NODES HERE BISH
+                    CurrentNodeCertainty = self.G.nodes[i]["Certainty"]
+                    NeighbourNodeCertainty = self.G.nodes[j]["Certainty"]
+                    # Move the less certain node halfway toward the more certain node
+                    if abs(CurrentNodeCertainty) < abs(NeighbourNodeCertainty):
+                        CurrentNodeCertainty = (CurrentNodeCertainty + NeighbourNodeCertainty)/2
+                    else:
+                        NeighbourNodeCertainty = (NeighbourNodeCertainty + CurrentNodeCertainty)/2
 
     def _update_voting_totals(self, node_id, PrevWillVote, action, team):
         global TotalVoting
