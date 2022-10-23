@@ -309,9 +309,9 @@ class AAAI_Game:
         curr_TeamNotVoting = TotalNotVoting
         
         #Safety net for diving by 0
-        if old_TeamVoting is 0:
+        if old_TeamVoting == 0:
             old_TeamVoting = 1
-        if old_TeamNotVoting is 0:
+        if old_TeamNotVoting == 0:
             old_TeamNotVoting = 1
 
         # calculate how big the reward Would be:
@@ -319,26 +319,30 @@ class AAAI_Game:
         PercentageChangeInNonVoters = curr_TeamNotVoting / old_TeamNotVoting 
         
         # More people (appear to be?) voting
-        if old_TeamVoting < curr_TeamVoting and team == blueTeam:
-            reward += 10 * PercentageChangeInVoters
-        else:
-            reward -= 10 * PercentageChangeInVoters
+        if old_TeamVoting < curr_TeamVoting:
+            if team == blueTeam:
+                reward += 10 * PercentageChangeInVoters
+            if team == redTeam:
+                reward -= 10 * PercentageChangeInVoters
                 
         # Less people (appear to be?) voting
-        if old_TeamVoting > curr_TeamVoting and team == blueTeam: 
-            reward -= 10 * PercentageChangeInVoters
-        else:
-            reward += 10 * PercentageChangeInVoters
+        if old_TeamVoting > curr_TeamVoting: 
+            if team == blueTeam:
+                reward -= 10 * PercentageChangeInVoters
+            if team == redTeam:
+                reward += 10 * PercentageChangeInVoters
         
         # More people (appear to be?) NOT voting
-        if old_TeamNotVoting > curr_TeamNotVoting and team == blueTeam:
-            reward += 10 * PercentageChangeInNonVoters
-        else:
-            reward -= 10 * PercentageChangeInNonVoters
+        if old_TeamNotVoting > curr_TeamNotVoting:
+            if team == blueTeam:
+                reward += 10 * PercentageChangeInNonVoters
+            if team == redTeam:
+                reward -= 10 * PercentageChangeInNonVoters
         
         # Less people (appear to be?) NOT voting
-        if old_TeamNotVoting > curr_TeamNotVoting and team == blueTeam:
-            reward += 10 * PercentageChangeInNonVoters
-        else:
-            reward -= 10 * PercentageChangeInNonVoters
+        if old_TeamNotVoting > curr_TeamNotVoting:
+            if team == blueTeam:
+                reward += 10 * PercentageChangeInNonVoters
+            if team == redTeam:
+                reward -= 10 * PercentageChangeInNonVoters
         return reward
