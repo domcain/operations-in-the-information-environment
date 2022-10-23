@@ -308,9 +308,15 @@ class AAAI_Game:
         curr_TeamVoting = TotalVoting
         curr_TeamNotVoting = TotalNotVoting
         
+        #Safety net for diving by 0
+        if old_TeamVoting is 0:
+            old_TeamVoting = 1
+        if old_TeamNotVoting is 0:
+            old_TeamNotVoting = 1
+
         # calculate how big the reward Would be:
         PercentageChangeInVoters = curr_TeamVoting / old_TeamVoting
-        PercentageChangeInNonVoters = curr_TeamNotVoting / old_TeamNotVoting
+        PercentageChangeInNonVoters = curr_TeamNotVoting / old_TeamNotVoting 
         
         # More people (appear to be?) voting
         if old_TeamVoting < curr_TeamVoting and team == blueTeam:
