@@ -9,6 +9,7 @@ from game import AAAI_Game, NumberOfGreyAgents
 from model import Linear_QNet, QTrainer
 import numpy as np
 import networkx as nx
+from helper import plot
 import matplotlib.pyplot as plt
 
 MAX_MEMORY = 100_000
@@ -143,8 +144,9 @@ def get_user_action():
         print("Enter a message potency level between 1 - 5\n","     OR      \n", "Type 6 to inject a GREY agent\n","     OR      \n","Type 7 to Skip a turn: ")
         while True:
             try:
-                
                 level = int(input())
+                if level == 1234: #terminate game
+                    sys.exit()
                 if level == 6 and NumberOfGreyAgents == 0:
                     print("Maximum number of grey agents have been played, try another move:\n")
                     continue
@@ -189,6 +191,8 @@ def train():
 
             turn += 1
             turn = turn % 2
+            game.round += 1
+            plt.plot(label = turn)
 
         if turn == PLAYER:
             if turn == blueTeam:
@@ -200,6 +204,8 @@ def train():
             
             turn += 1
             turn = turn % 2
+            game.round += 1
+            plt.plot(label = turn)
 
         if done:
             # train long memory, plot result
@@ -212,7 +218,11 @@ def train():
                 agent.model.save()
 
             print("Game", agent.n_games, "Score", score, "Record", record)
-
+            plot_scores.append(score)
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
+            plot(plot_scores, plot_mean_scores)
             # TODO: plot
 
 

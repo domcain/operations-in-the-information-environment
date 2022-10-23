@@ -16,8 +16,8 @@ NumberOfGreyAgents = 5                              # Number of times Blue can i
 RedSpyProportion = 0.5                              # How likely is a foreign to be bad 
 
 # Certainty related variables
-LowCertainty = -0.9                                 # The certainty below which the agents know a node will NOT vote in the election
-HighCertainty = 0.9                                 # The certainty above which the agents know a node will vote in the election
+LowCertainty = -0.5                                 # The certainty below which the agents know a node will NOT vote in the election
+HighCertainty = 0.5                                 # The certainty above which the agents know a node will vote in the election
 VoteThreshold = (HighCertainty + LowCertainty) / 2  # A certainty level, above which a green node will vote in the election.
 MaxCertainty = 1.0
 MinCertainty = -1.0
@@ -66,6 +66,8 @@ class AAAI_Game:
         self.NumberOfGreyAgents = NumberOfGreyAgents
         self.score = 0
         self.isGrey = False
+        self.round = 0
+        # self.reset()
 
         # NumberOfNodes = int(input("Enter the size of the Green Team: "))
         # ProbabilityOfConnection = float(input(
@@ -133,6 +135,7 @@ class AAAI_Game:
     #   Creates a new GUI
     def reset(self):
         global PLAYER, AI, turn
+        print("\nNEW GAME\n")
         # init game state
         self.G = nx.gnp_random_graph(NumberOfNodes, ProbabilityOfConnection)
  
@@ -141,7 +144,8 @@ class AAAI_Game:
             self.G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
             self.G.nodes[i]["Will Vote"] = None
             self.G.nodes[i]["Ignore Red"] = False
-            self.G.nodes[i]["Tolerance"] = Tolerance[i]  
+            self.G.nodes[i]["Tolerance"] = Tolerance[i]
+            self._update_will_vote_values(self.G)  
         
         # Build internal representation of the graph.
         nx.draw(self.G, node_color="Green", with_labels=1)
@@ -243,7 +247,7 @@ class AAAI_Game:
             for j in range(len(neighbors)):
                 if neighbors[j] > i:
                     CurrentNodeCertainty = self.G.nodes[i]["Certainty"]
-                    NeighbourNodeCertainty = self.G.nodes[j]["Certainty"]
+                    NeighbourNodeCertainty = self.G.nodes[neighbors[j]]["Certainty"]
                     # Move the less certain node halfway toward the more certain node
                     if abs(CurrentNodeCertainty) < abs(NeighbourNodeCertainty):
                         CurrentNodeCertainty = (CurrentNodeCertainty + NeighbourNodeCertainty)/2
@@ -289,11 +293,11 @@ class AAAI_Game:
                 if self.G.nodes[n]["Certainty"] > MaxCertainty: 
                     self.G.nodes[n]["Certainty"] = MaxCertainty
                 
-                self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
-                # Subtract the cost of the move from the budget.
-                if self.isGrey == False:
-                    CurrentBalance -= BudgetAUD * multiplierDict[action]
-                self._green_interact()
+            self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
+            # Subtract the cost of the move from the budget.
+            if self.isGrey == False:
+                CurrentBalance -= BudgetAUD * multiplierDict[action]
+            self._green_interact()
 
                 # round += 1
         # Intrduce a foreign power into the game.   
@@ -314,10 +318,10 @@ class AAAI_Game:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
                 self.G.nodes[n]["Certainty"] -= abs(self.G.nodes[n]["Certainty"]) * multiplierDict[action]
-                if self.G.nodes[n]["Certainty"] > MinCertainty: 
+                if self.G.nodes[n]["Certainty"] < MinCertainty: 
                     self.G.nodes[n]["Certainty"] = MinCertainty
-                self._green_interact()
-                self._update_voting_totals(n, PrevWillVote, multiplierDict[action], redTeam)
+            self._green_interact()
+            self._update_voting_totals(n, PrevWillVote, multiplierDict[action], redTeam)
 
     # Gifts a reasonable reward or punishment to the agent based upon changes to the voting totals.
     def _get_reward(self,old_TeamVoting, old_TeamNotVoting, team):
