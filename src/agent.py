@@ -19,8 +19,10 @@ PLAYER = 0
 AI = 1
 redTeam = 1
 blueTeam = 0
+NoOfActions = 5
 
 
+# add 
 turn = PLAYER
 class Agent:
     def __init__(self, game):
@@ -29,7 +31,9 @@ class Agent:
         self.gamma = 0.9  # discount rate, smaller than 1
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when memory is full
         self.model = Linear_QNet(
-            game.NumberOfNodes, 256, 7 #11 will be state size or number of nodes in graph G
+        
+            game.NumberOfNodes, 256, NoOfActions #7 needs to chane to AI red or blue moves 
+
         )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
@@ -67,23 +71,33 @@ class Agent:
     def get_action(self, state):
         # random moves: tradeoff between exploration and exploitation (deep learning)
         self.epsilon = 80 - self.n_games
+        # the more games the smaller the epsilon (or randomness) leading to more tailored moves
+        
         if AI == redTeam:  
-            final_move = [0, 0, 0, 0, 0]  # 5 levels of potency in ascending order
-            if random.randint(0, 200) < self.epsilon:
+            final_move = [0, 0, 0, 0, 0, 0, 0]  # 5 levels of potency in ascending order
+            #Pick Random Move 
+            if random.randint(0, 200) < self.epsilon: 
                 move = random.randint(0, 4)  # gives random number between 0 and 4
                 final_move[move] = 1
                 display_message(move, redTeam)
+            else:
+                state0 = torch.tensor(state, dtype=torch.float)
+                prediction = self.model(state0)  # will execute forward function
+                print("Prediction: ", prediction)
+                move = torch.argmax(prediction).item()
+                final_move[move] = 1
+
         if AI == blueTeam:
             final_move = [0, 0, 0, 0, 0, 0, 0]  # 5 levels of budget spend in ascending order with the last two options being play a grey agent and do nothing (respectively)
             if random.randint(0, 200) < self.epsilon:
                 move = random.randint(0, 6)  # gives random number between 0 and 6
                 final_move[move] = 1
                 display_message(move, blueTeam)
-        else:
-            state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)  # will execute forward function
-            move = torch.argmax(prediction).item()
-            final_move[move] = 1
+            else:
+                state0 = torch.tensor(state, dtype=torch.float)
+                prediction = self.model(state0)  # will execute forward function
+                move = torch.argmax(prediction).item()
+                final_move[move] = 1
 
         return final_move
 
@@ -118,17 +132,27 @@ def display_message(number, team):
 
 def get_user_action():
     level = 0
-    while 1 > level or 5 < level:
-        try:
-            level = int(input("Enter a message potency level between 1 - 5: "))
-        except ValueError:
-            print("That wasn't an integer :(\n")
-    return level
+    if PLAYER == redTeam:
+        while 1 > level or 5 < level:
+            try:
+                level = int(input("Enter a message potency level between 1 - 5: "))
+            except ValueError:
+                print("That wasn't an integer :(\n")
+        return level-1
+    if PLAYER == blueTeam:
+        while 1 > level or 7 < level:
+            try:
+                print("Enter a message potency level between 1 - 5\n","     OR      \n", "Type 6 to inject a GREY agent\n","     OR      \n","Type 7 to Skip a turn: ")
+                level = int(input())
+            except ValueError:
+                print("That wasn't an integer :(\n")
+        return level-1
 
 def train():
     plot_scores = []  # track scores
     plot_mean_scores = []  # average scores
     total_score = 0
+    final_move_index = 0
     record = 0
     game = AAAI_Game()
     agent = Agent(game)
@@ -136,14 +160,18 @@ def train():
     turn = PLAYER
     while True:  # training loop
         if turn == AI:
+            if AI == blueTeam:
+                NoOfActions = 7
+            if AI == redTeam:
+                NoOfActions = 5
             # get current state
             current_state = agent.get_state(game)
 
             # get move
             final_move = agent.get_action(current_state)
-
+            final_move_index = final_move.index(1)
             # perform move and get new state
-            reward, done, score = game.play_step(final_move, turn)
+            reward, done, score = game.play_step(final_move_index, turn)
             new_state = agent.get_state(game)
 
             # train short-memory

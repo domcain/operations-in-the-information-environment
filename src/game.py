@@ -34,12 +34,13 @@ TotalNotVoting = 0                                  #
 blueTeam    = 0                                     #
 redTeam     = 1                                     #
 multiplierDict = {                                  # Dictionary containing each move and it's corresponding potency value
-    1:1.01,
-    2:1.03,
-    3:1.09,
-    4:1.32,
-    5:1.99
+    0:1.01,
+    1:1.03,
+    2:1.09,
+    3:1.32,
+    4:1.99
 }
+
 reward = 0
 
 # Australian Liberal/Labour expenses on political advertisement in 2022
@@ -60,6 +61,8 @@ class AAAI_Game:
     def __init__(self):
         global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold
         self.NumberOfNodes = NumberOfNodes
+        self.score = 0
+
         # NumberOfNodes = int(input("Enter the size of the Green Team: "))
         # ProbabilityOfConnection = float(input(
         #     "Enter the probability of a connection between any given green player: "
@@ -164,8 +167,10 @@ class AAAI_Game:
         if turn == PLAYER:
             self._move(action, PLAYER)
             game_over = False
+            
             if self.round_limit():
                 game_over = True
+                
                 return game_over, self.score
             self._update_ui()
             # self.update_graph(self.G)
@@ -174,6 +179,7 @@ class AAAI_Game:
             self._move(action, AI)  # Choose move (update the head)
             # 3. check if game over
             game_over = False
+            self.get_score(self.score)
             if self.round_limit():
                 game_over = True
                 return game_over, self.score
@@ -188,7 +194,22 @@ class AAAI_Game:
             # self.clock.tick(SPEED)
 
             # 6. return game over and score
+
             return reward, game_over, self.score
+
+    def get_score(self, score):
+        global TotalVoting, TotalNotVoting
+        if AI == blueTeam:
+            if TotalVoting > TotalNotVoting:
+                score = 1
+            else:
+                score = 0
+        if AI == redTeam:
+            if TotalNotVoting > TotalNotVoting:
+                score = 1
+        else:
+                score = 0 
+        return score
 
     # Checker function to see if the game has finished.
     def round_limit(self, round=0):
@@ -252,8 +273,8 @@ class AAAI_Game:
 
     # Calls the relevant functions based upon the move selected by the player or agent.
     def _move(self, action, team):
-        global BudgetAUD, CurrentBalance, round
-        if team == blueTeam & action <= 5 & CurrentBalance > 0:
+        global BudgetAUD, CurrentBalance, round, reward
+        if team == blueTeam & action <= 4 & CurrentBalance > 0:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 print(" self.G.nodes[n]: ",  self.G.nodes[n]["Certainty"])
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
@@ -263,13 +284,12 @@ class AAAI_Game:
                 CurrentBalance -= BudgetAUD*(multiplierDict[action]-1)
                 # round += 1
         # Intrduce a foreign power into the game.   
-        elif team == blueTeam & action == 6:
-            # introduce_grey_agent()
-            round += 1
+        elif team == blueTeam and action == 5:
+            # TODO: introduce_grey_agent()
+            pass
         # Skip blue teams turn.
-        elif team == blueTeam & action == 7:
-            round += 1
-        # TODO: ADD MATHS
+        elif team == blueTeam and action == 6:
+            pass
                   
 
         if team == redTeam:
