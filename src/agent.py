@@ -146,7 +146,7 @@ def get_user_action():
                 
                 level = int(input())
                 if level == 6 and NumberOfGreyAgents == 0:
-                    print("Maximum number of grey agents have been played, try another move: \n")
+                    print("Maximum number of grey agents have been played, try another move:\n")
                     continue
                 if level >= 1 and level <= 7:
                     break
