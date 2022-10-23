@@ -236,7 +236,7 @@ class AAAI_Game:
         if team == redTeam:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
-                self.G.nodes[n]["Certainty"] = (self.G.nodes[n]["Certainty"]) * (2 - multiplierDict[action])
+                self.G.nodes[n]["Certainty"] = (self.G.nodes[n]["Certainty"]) * (2 - multiplierDict[action]) #TODO ACTION IS A FUCKIMNG LISTs
                 self._update_voting_totals(n, PrevWillVote, multiplierDict[action], redTeam)
                 # round += 1
                 # TODO: ADD MATHS
