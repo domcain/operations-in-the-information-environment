@@ -207,7 +207,7 @@ class AAAI_Game:
             else:
                 score = 0
         if AI == redTeam:
-            if TotalNotVoting > TotalNotVoting:
+            if TotalNotVoting > TotalVoting:
                 score = 1
         else:
                 score = 0 
@@ -232,11 +232,11 @@ class AAAI_Game:
     # More opinionated green people influence their less opinionated neighbours.
     def _green_interact(self):
         # Iterate through the array of green nodes
-        for i in self.G.nodes(data="Certainty"):
+        for i in self.G.nodes():
             # Who are the current nodes neighbours?
-            neighbors = nx.neighbors(self.G, i)
+            neighbors = list(self.G.neighbors(i))
             # Iterate through the neighbours this node hasn't interacted with yet
-            for j in neighbors:
+            for j in range(len(neighbors)):
                 if neighbors[j] > i:
                     CurrentNodeCertainty = self.G.nodes[i]["Certainty"]
                     NeighbourNodeCertainty = self.G.nodes[j]["Certainty"]
