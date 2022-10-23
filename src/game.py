@@ -34,11 +34,11 @@ TotalNotVoting = 0                                  #
 blueTeam    = 0                                     #
 redTeam     = 1                                     #
 multiplierDict = {                                  # Dictionary containing each move and it's corresponding potency value
-    0:1.01,
-    1:1.03,
-    2:1.09,
-    3:1.32,
-    4:1.99
+    0:0.01,
+    1:0.03,
+    2:0.09,
+    3:0.32,
+    4:0.99
 }
 
 reward = 0
@@ -61,7 +61,9 @@ class AAAI_Game:
     def __init__(self):
         global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold
         self.NumberOfNodes = NumberOfNodes
+        self.NumberOfGreyAgents = NumberOfGreyAgents
         self.score = 0
+        self.isGrey = False
 
         # NumberOfNodes = int(input("Enter the size of the Green Team: "))
         # ProbabilityOfConnection = float(input(
@@ -167,13 +169,15 @@ class AAAI_Game:
         if turn == PLAYER:
             self._move(action, PLAYER)
             game_over = False
-            
+
             if self.round_limit():
                 game_over = True
                 
                 return game_over, self.score
             self._update_ui()
             # self.update_graph(self.G)
+            if self.isGrey == True:
+                self.isGrey = False
             return game_over
         else:
             self._move(action, AI)  # Choose move (update the head)
@@ -186,15 +190,15 @@ class AAAI_Game:
 
             # 4. place new food or just move
             # old_reward = reward
-            reward = self._get_reward(old_TeamVoting, old_TeamNotVoting,turn)
+            reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn)
             
             # 5. update ui and clock
             self._update_ui()
             # self.update_graph(self.G)
             # self.clock.tick(SPEED)
-
+            if self.isGrey == True:
+                self.isGrey = False
             # 6. return game over and score
-
             return reward, game_over, self.score
 
     def get_score(self, score):
@@ -205,7 +209,7 @@ class AAAI_Game:
             else:
                 score = 0
         if AI == redTeam:
-            if TotalNotVoting > TotalNotVoting:
+            if TotalNotVoting > TotalVoting:
                 score = 1
         else:
                 score = 0 
@@ -259,17 +263,17 @@ class AAAI_Game:
         if node["Certainty"] < LowCertainty:
             TotalNotVoting += 1
         
-        
-        # From Reds message potency, e.g. 1.x, x*10 becomes the chance of ignoring red team members.
-        IgnoreRedchance = ((1 - action) * 10)
-        # Green nodes only ignore Red when their certainty value is positive (leaning toward voting).
-        if team == redTeam and node["Certainty"] > 0.0:
-            # If the Green node doesn't tolerate Red's nonsense, they will ignore them. 
-            if IgnoreRedchance >= node["Tolerance"]:
-                node["Ignore Red"] = True
-            # If they tolerate a bit, leave whether they ignore Red to chance (nonsense / tolerance of respective node).
-            else:
-                node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])             
+        if self.isGrey == False:
+            # From Reds message potency, e.g. 1.x, x*10 becomes the chance of ignoring red team members.
+            IgnoreRedchance = ((1 - action) * 10)
+            # Green nodes only ignore Red when their certainty value is positive (leaning toward voting).
+            if team == redTeam and node["Certainty"] > 0.0:
+                # If the Green node doesn't tolerate Red's nonsense, they will ignore them. 
+                if IgnoreRedchance >= node["Tolerance"]:
+                    node["Ignore Red"] = True
+                # If they tolerate a bit, leave whether they ignore Red to chance (nonsense / tolerance of respective node).
+                else:
+                    node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])             
 
     # Calls the relevant functions based upon the move selected by the player or agent.
     def _move(self, action, team):
@@ -281,17 +285,23 @@ class AAAI_Game:
                 self.G.nodes[n]["Certainty"] = self.G.nodes[n]["Certainty"] * multiplierDict[action]
                 self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
                 # Subtract the cost of the move from the budget.
-                CurrentBalance -= BudgetAUD*(multiplierDict[action]-1)
+                if self.isGrey == False:
+                    CurrentBalance -= BudgetAUD*(multiplierDict[action]-1)
                 # round += 1
         # Intrduce a foreign power into the game.   
-        elif team == blueTeam and action == 5:
+        elif team == blueTeam and action == 5 and self.isGrey == False:
+            self.isGrey = True
             # TODO: introduce_grey_agent()
-            pass
+            grey_type = random.randint(PLAYER, AI)
+            grey_action = random.randint(0,4)
+            self.NumberOfGreyAgents -= 1
+            self.play_step(grey_action, grey_type)
+            
+            
         # Skip blue teams turn.
         elif team == blueTeam and action == 6:
             pass
                   
-
         if team == redTeam:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
