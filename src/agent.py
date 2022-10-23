@@ -31,7 +31,9 @@ class Agent:
         self.gamma = 0.9  # discount rate, smaller than 1
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when memory is full
         self.model = Linear_QNet(
+        
             game.NumberOfNodes, 256, NoOfActions #7 needs to chane to AI red or blue moves 
+
         )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
