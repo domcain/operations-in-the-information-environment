@@ -293,15 +293,7 @@ class AAAI_Game:
             self.isGrey = True
             # TODO: introduce_grey_agent()
             grey_type = random.randint(PLAYER, AI)
-            if grey_type == redTeam:
-                grey_action = random.randint(0,4)
-            while True:
-                if grey_type == blueTeam:
-                    grey_action = random.randint(0,6)
-                if grey_action == 5:
-                    continue
-                else:
-                    break
+            grey_action = random.randint(0,4)
             self.NumberOfGreyAgents -= 1
             self.play_step(grey_action, grey_type)
             
