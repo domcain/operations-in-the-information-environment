@@ -7,11 +7,11 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 multiplierDict = {
-    1:1.01,
-    2:1.03,
-    3:1.09,
-    4:1.32,
-    5:1.99
+    0:1.01,
+    1:1.03,
+    2:1.09,
+    3:1.32,
+    4:1.99
 }
 
 # global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, turn
@@ -37,6 +37,7 @@ TotalVoting = 0
 TotalNotVoting = 0
 blueTeam    = 0
 redTeam     = 1
+reward = 0
 
 # Australian Liberal/Labour expenses on political advertisement in 2022
 StartingBudgetAUD = 250000
@@ -53,6 +54,7 @@ class AAAI_Game:
     def __init__(self):
         global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold
         self.NumberOfNodes = NumberOfNodes
+        self.score = 0
         # NumberOfNodes = int(input("Enter the size of the Green Team: "))
         # ProbabilityOfConnection = float(input(
         #     "Enter the probability of a connection between any given green player: "
@@ -87,9 +89,6 @@ class AAAI_Game:
 
         # Generate user interface of the graph.
         plt.show()
-    
-    def access_graph(self, graph):
-        return self.G
 
     def _update_will_vote_values(self, graph): #Creates/Updates the voting/not voting arrays for every node in the graph
         NodesVoting = [] # A list of nodes that are going to vote
@@ -138,13 +137,16 @@ class AAAI_Game:
             AI = redTeam
 
     def play_step(self, action, turn):
+        global reward #initalised at 0
         # 1. Get User Input
         # 2. Play move
         if turn == PLAYER:
             self._move(action, PLAYER)
             game_over = False
+            
             if self.round_limit():
                 game_over = True
+                
                 return game_over, self.score
             self._update_ui()
             # self.update_graph(self.G)
@@ -153,6 +155,7 @@ class AAAI_Game:
             self._move(action, AI)  # Choose move (update the head)
             # 3. check if game over
             game_over = False
+            self.get_score(self.score)
             if self.round_limit():
                 game_over = True
                 return game_over, self.score
@@ -167,7 +170,23 @@ class AAAI_Game:
             # self.clock.tick(SPEED)
 
             # 6. return game over and score
+
             return reward, game_over, self.score
+
+
+    def get_score(self, score):
+        global TotalVoting, TotalNotVoting
+        if AI == blueTeam:
+            if TotalVoting > TotalNotVoting:
+                score = 1
+            else:
+                score = 0
+        if AI == redTeam:
+            if TotalNotVoting > TotalNotVoting:
+                score = 1
+        else:
+                score = 0 
+        return score
 
     def round_limit(self, round=0):
         if round > 20:
@@ -225,7 +244,7 @@ class AAAI_Game:
                 node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])             
 
     def _move(self, action, team):
-        global BudgetAUD, CurrentBalance, round
+        global BudgetAUD, CurrentBalance, round, reward
         if team == blueTeam & action <= 5 & CurrentBalance > 0:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 print(" self.G.nodes[n]: ",  self.G.nodes[n]["Certainty"])
@@ -248,7 +267,7 @@ class AAAI_Game:
         if team == redTeam:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
-                self.G.nodes[n]["Certainty"] = (self.G.nodes[n]["Certainty"]) * (2 - multiplierDict[action]) #TODO ACTION IS A FUCKIMNG LISTs
+                self.G.nodes[n]["Certainty"] = (self.G.nodes[n]["Certainty"]) * (2 - multiplierDict[action])
                 self._update_voting_totals(n, PrevWillVote, multiplierDict[action], redTeam)
                 # round += 1
                 # TODO: ADD MATHS
