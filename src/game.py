@@ -40,6 +40,7 @@ multiplierDict = {                                  # Dictionary containing each
     4:1.32,
     5:1.99
 }
+reward = 0
 
 # Australian Liberal/Labour expenses on political advertisement in 2022
 StartingBudgetAUD = 250000
@@ -155,6 +156,10 @@ class AAAI_Game:
     # If the game has run its' course, stop and return the current score.
     # Otherwise, play a move and update the GUI.
     def play_step(self, action, turn):
+        global TotalVoting, TotalNotVoting
+        old_TeamVoting = TotalVoting
+        old_TeamNotVoting = TotalNotVoting
+        
         # Plays a move based upon the users input
         if turn == PLAYER:
             self._move(action, PLAYER)
@@ -174,8 +179,8 @@ class AAAI_Game:
                 return game_over, self.score
 
             # 4. place new food or just move
-            old_reward = reward
-            reward = self._get_reward(old_reward,turn)
+            # old_reward = reward
+            reward = self._get_reward(old_TeamVoting, old_TeamNotVoting,turn)
             
             # 5. update ui and clock
             self._update_ui()
@@ -274,21 +279,40 @@ class AAAI_Game:
                 self._update_voting_totals(n, PrevWillVote, multiplierDict[action], redTeam)
 
     # Gifts a reasonable reward or punishment to the agent based upon changes to the voting totals.
-    def _get_reward(self, old_TeamVoting, team):
+    def _get_reward(self,old_TeamVoting, old_TeamNotVoting, team):
+        global TotalVoting, TotalNotVoting
+        
+        # Reset the reward from the previous player
         reward = 0
-        global TotalVoting
+        
         curr_TeamVoting = TotalVoting
-        if old_TeamVoting == curr_TeamVoting: #no change
-                reward = 0
-
-        if team == blueTeam:
-            if old_TeamVoting > curr_TeamVoting: #define this variable 
-                reward = 10 #  percentage increase in people voting is the multiplier
-            if old_TeamVoting > curr_TeamVoting:
-                reward = -10 * reward # percentage decrease in people voting is the multiplier
-        if team == redTeam:
-            if old_TeamNotVoting > curr_TeamNotVoting: #define this variable 
-                reward = 10 * X # percentage increase in people voting is the multiplier
-            if old_TeamNotVoting > curr_TeamNotVoting:
-                reward = -10 * X # percentage decrease in people voting is the multiplier
+        curr_TeamNotVoting = TotalNotVoting
+        
+        # calculate how big the reward Would be:
+        PercentageChangeInVoters = curr_TeamVoting / old_TeamVoting
+        PercentageChangeInNonVoters = curr_TeamNotVoting / old_TeamNotVoting
+        
+        # More people (appear to be?) voting
+        if old_TeamVoting < curr_TeamVoting and team == blueTeam:
+            reward += 10 * PercentageChangeInVoters
+        else:
+            reward -= 10 * PercentageChangeInVoters
+                
+        # Less people (appear to be?) voting
+        if old_TeamVoting > curr_TeamVoting and team == blueTeam: 
+            reward -= 10 * PercentageChangeInVoters
+        else:
+            reward += 10 * PercentageChangeInVoters
+        
+        # More people (appear to be?) NOT voting
+        if old_TeamNotVoting > curr_TeamNotVoting and team == blueTeam:
+            reward += 10 * PercentageChangeInNonVoters
+        else:
+            reward -= 10 * PercentageChangeInNonVoters
+        
+        # Less people (appear to be?) NOT voting
+        if old_TeamNotVoting > curr_TeamNotVoting and team == blueTeam:
+            reward += 10 * PercentageChangeInNonVoters
+        else:
+            reward -= 10 * PercentageChangeInNonVoters
         return reward
