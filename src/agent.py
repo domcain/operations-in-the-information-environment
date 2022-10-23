@@ -130,12 +130,21 @@ def display_message(number, team):
 
 def get_user_action():
     level = 0
-    while 1 > level or 5 < level:
-        try:
-            level = int(input("Enter a message potency level between 1 - 5: "))
-        except ValueError:
-            print("That wasn't an integer :(\n")
-    return level
+    if PLAYER == redTeam:
+        while 1 > level or 5 < level:
+            try:
+                level = int(input("Enter a message potency level between 1 - 5: "))
+            except ValueError:
+                print("That wasn't an integer :(\n")
+        return level-1
+    if PLAYER == blueTeam:
+        while 1 > level or 7 < level:
+            try:
+                print("Enter a message potency level between 1 - 5\n","     OR      \n", "Type 6 to inject a GREY agent\n","     OR      \n","Type 7 to Skip a turn: ")
+                level = int(input())
+            except ValueError:
+                print("That wasn't an integer :(\n")
+        return level-1
 
 def train():
     plot_scores = []  # track scores

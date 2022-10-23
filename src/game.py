@@ -245,7 +245,7 @@ class AAAI_Game:
 
     def _move(self, action, team):
         global BudgetAUD, CurrentBalance, round, reward
-        if team == blueTeam & action <= 5 & CurrentBalance > 0:
+        if team == blueTeam & action <= 4 & CurrentBalance > 0:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 print(" self.G.nodes[n]: ",  self.G.nodes[n]["Certainty"])
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
@@ -255,13 +255,12 @@ class AAAI_Game:
                 CurrentBalance -= BudgetAUD*(multiplierDict[action]-1)
                 # round += 1
         # Intrduce a foreign power into the game.   
-        elif team == blueTeam & action == 6:
-            # introduce_grey_agent()
-            round += 1
+        elif team == blueTeam and action == 5:
+            # TODO: introduce_grey_agent()
+            pass
         # Skip blue teams turn.
-        elif team == blueTeam & action == 7:
-            round += 1
-        # TODO: ADD MATHS
+        elif team == blueTeam and action == 6:
+            pass
                   
 
         if team == redTeam:
