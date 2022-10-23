@@ -292,7 +292,7 @@ class AAAI_Game:
                 self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
                 # Subtract the cost of the move from the budget.
                 if self.isGrey == False:
-                  CurrentBalance -= BudgetAUD * multiplierDict[action]
+                    CurrentBalance -= BudgetAUD * multiplierDict[action]
                 self._green_interact()
 
                 # round += 1
