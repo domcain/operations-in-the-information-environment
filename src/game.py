@@ -36,11 +36,11 @@ TotalNotVoting = 0                                  #
 blueTeam    = 0                                     #
 redTeam     = 1                                     #
 multiplierDict = {                                  # Dictionary containing each move and it's corresponding potency value
-    0:0.01,
-    1:0.03,
-    2:0.09,
-    3:0.32,
-    4:0.99
+    0:0.1,
+    1:0.2,
+    2:0.4,
+    3:0.6,
+    4:0.8
 }
 
 reward = 0
@@ -136,7 +136,7 @@ class AAAI_Game:
     #   Choses who will move first and what team they are on
     #   Creates a new GUI
     def reset(self):
-        global PLAYER, AI, turn
+        global PLAYER, AI, turn, TotalVoting, TotalNotVoting
         print("\nNEW GAME\n")
         # init game state
         self.G = nx.gnp_random_graph(NumberOfNodes, ProbabilityOfConnection)
@@ -156,7 +156,9 @@ class AAAI_Game:
         plt.show()
         
         self.score = 0
-        # self.round = 0
+        self.round = 0
+        TotalVoting = 0
+        TotalNotVoting = 0
         
 
     # If the game has run its' course, stop and return the current score.
@@ -191,7 +193,7 @@ class AAAI_Game:
             self._move(action, AI)  # Choose move (update the head)
             # 3. check if game over
             game_over = False
-            self.get_score(self.score)
+            self.score = self.get_score(self.score)
 
             
 
@@ -220,15 +222,19 @@ class AAAI_Game:
     def get_score(self, score):
         global TotalVoting, TotalNotVoting
         if AI == blueTeam:
-            if TotalVoting > TotalNotVoting:
-                score += 1
-            else:
-                score = 0
+            # if TotalVoting > TotalNotVoting:
+            #     score += 1
+            # else:
+                # score = -1
+            
+            score = TotalVoting - TotalNotVoting   
         if AI == redTeam:
-            if TotalNotVoting > TotalVoting:
-                score += 1
-        else:
-                score = 0 
+        #     if TotalNotVoting > TotalVoting:
+        #         score += 1
+        # else:
+        #         score = -1 
+            
+            score = TotalNotVoting - TotalVoting
         return score
 
     # Checker function to see if the game has finished.
@@ -292,25 +298,38 @@ class AAAI_Game:
                     node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])             
 
     # Calls the relevant functions based upon the move selected by the player or agent.
+    def _calc_valid_move(self, action):
+        if action > 4:
+            return False
+        CostOfMove = StartingBudgetAUD * multiplierDict[action]
+        if CurrentBalance > CostOfMove:
+            return True
+        else:
+            return False
+        
+
+
     def _move(self, action, team):
-        global BudgetAUD, CurrentBalance, round, reward, MaxCertainty, MinCertainty
-        if team == blueTeam & action <= 4 & CurrentBalance > 0:
-            for n in self.G.nodes: #add multiplier for each message level then affect blue budget
-                print(" self.G.nodes[n]: ",  self.G.nodes[n]["Certainty"])
-                PrevWillVote = self.G.nodes[n]["Will Vote"]
-                self.G.nodes[n]["Certainty"] += abs(self.G.nodes[n]["Certainty"]) * multiplierDict[action]
-                
-                if self.G.nodes[n]["Certainty"] > MaxCertainty: 
-                    self.G.nodes[n]["Certainty"] = MaxCertainty
+        global StartingBudgetAUD, CurrentBalance, round, reward, MaxCertainty, MinCertainty
+        if action<= 4:
+            CostOfMove = StartingBudgetAUD * multiplierDict[action]
+            if team == blueTeam and CurrentBalance > CostOfMove:
+                for n in self.G.nodes: #add multiplier for each message level then affect blue budget
+                    print(" self.G.nodes[n]: ",  self.G.nodes[n]["Certainty"])
+                    PrevWillVote = self.G.nodes[n]["Will Vote"]
+                    self.G.nodes[n]["Certainty"] += abs(self.G.nodes[n]["Certainty"]) * multiplierDict[action]
+                    
+                    if self.G.nodes[n]["Certainty"] > MaxCertainty: 
+                        self.G.nodes[n]["Certainty"] = MaxCertainty
 
-            self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
-            # Subtract the cost of the move from the budget.
-            if self.isGrey == False:
-                CurrentBalance -= BudgetAUD * multiplierDict[action]
-            self._green_interact()
+                self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
+                # Subtract the cost of the move from the budget.
+                if self.isGrey == False:
+                    CurrentBalance -= CostOfMove
+                self._green_interact()
 
-                # round += 1
-        # Intrduce a foreign power into the game.   
+                    # round += 1
+            # Intrduce a foreign power into the game.   
         elif team == blueTeam and action == 5 and self.isGrey == False:
             self.isGrey = True
             # TODO: introduce_grey_agent()

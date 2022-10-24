@@ -23,6 +23,8 @@ redTeam = 1
 blueTeam = 0
 NoOfActions = 5
 
+#Set to True to test with random moves
+isTesting = True 
 
 turn = PLAYER
 class Agent:
@@ -102,43 +104,53 @@ class Agent:
 def display_message(number, team):
     if team == blueTeam:
         if number == 0:
-            print("Just in from the blueTeam: '.'\n")
+            print("Blue Party Announcement: 'We welcome all those showing support in our struggle for Democracy! ' \n")
         if number == 1:
-            print("Just in from the blueTeam: '.'\n")
+            print("Just in from The Blue Party: 'Records indicate absence of Blue Party interference in Red Parties' resource negotiations with The United Blacklands.'\n")
         if number == 2:
-            print("Just in from the blueTeam: '.'\n")
+            print("'Official Birth Certificate of @BluePartyLeader clarifies their idigenous Greenland heritage.'\n")
         if number == 3:
-            print("Just in from the blueTeam: '.'\n")
+            print("Just in from The Blue Party: 'R&D into wind turbines conducted in 2012 reduced wildlife wind-turbine related deaths to 0 since their implementation in 2015.'\n")
         if number == 4:
-            print("Just in from the blueTeam: '.'\n")
+            print("Breaking News: 'Concerns that Autism Spectrum Disorder(ASD) might be linked to vaccination, BUT studies have shown that there is no link between receiving vaccines and developing ASD. The National Institute of Medicine reviewed the safety of 8 vaccines. The findings state that vaccines are very safe.'\n")
         if number == 5:
-            print("Blue Team played a SPY '.'\n")
+            print("The Blue Party have snuck an illegal immigrant into Greenland\n")
         if number == 6:
-            print("Blue Team skipped a turn '.'\n")
+            print("The Blue Party turned a blind eye\n")
 
     if team == redTeam:
         if number == 0:
-            print("Just in from the redTeam: 'Purple leaders are publicly celebrating Blue Teams's reelection. They can't wait to see how flexible the Blue Team will be now.'\n")
+            print("Just in from the Proud Elephants: 'Purple leaders are publicly celebrating the formalisation of Gang; 'The Blue Party'. They can't wait to see how flexible The Blue Party may be.'\n")
         if number == 1:
-            print("Just in from the redTeam: 'We should have gotten more of the oil in Syria, and we should have gotten more of the oil in Irag. Dumb Blue Team.'\n")
+            print("Just in from the Proud Elephants: 'We should have gotten more of the oil in The United Blacklands. Dumb Blue Party meddling with negotiations.'\n")
         if number == 2:
-            print("Just in from the redTeam: 'Let's take a closer look at that birth certificate. @BlueAgent was described in 2003 as being 'born in OrangeLand'.\n")
+            print("Just in from the Proud Elephants: 'Let's take a closer look at that birth certificate. Mob Boss: @BluePartyLeader was described in 2003 as being 'born in OrangeLand'.\n")
         if number == 3:
-            print("Just in from the redTeam: 'Blue Team's Windmills are the greatest threat in the Green Country to both bald and hairless green people. Media claims fictional 'global warming' is worse.'\n")
+            print("Just in from the Proud Elephants: 'Blue Team's Windmills are the greatest threat in the Green Country to both bald and hairless green people. Media claims fictional 'global warming' is worse.'\n")
         if number == 4:
-            print("Just in from the redTeam: 'Healthy young child goes to doctor, gets pumped with massive shot of many vaccines, doesn't feel good and changes - AUTISM. Many such cases.'\n")
+            print("Just in from the Proud Elephants: 'Healthy young child goes to doctor, gets pumped with massive shot of many vaccines, doesn't feel good and changes - AUTISM. Many such cases.'\n")
 
 def get_user_action():
     level = 0
     if PLAYER == redTeam:
+        if isTesting:
+            return random.randint(0,4)
         while 1 > level or 5 < level:
             try:
                 level = int(input("Red Team Options: \n", "    - Enter a message potency of your choice (1 - 5) \n"))
             except ValueError:
                 print("That wasn't an integer :(\n")
-        return level-1
+        return level
     if PLAYER == blueTeam:
         print("Blue Team Options: \n" , "    - Enter a message potency level between (1 - 5)\n", "    - Inject a GREY agent (6)\n","    - Skip a turn (7)\n")
+        if isTesting:
+            while True:
+                level = random.randint(0,6)
+                if level == 6 and NumberOfGreyAgents == 0:
+                    continue
+                else:
+                    return level
+
         while True:
             try:
                 level = int(input())
@@ -148,7 +160,11 @@ def get_user_action():
                     print("Maximum number of grey agents have been played, try another move:\n")
                     continue
                 if level >= 1 and level <= 7:
-                    break
+                    if AAAI_Game().calc_valid_move(level-1):
+                        break
+                    else:
+                        print("You don't have enough money! Try another move :(\n")
+                        continue
             except ValueError:
                 print("That wasn't an integer :(\n")
             
@@ -168,27 +184,34 @@ def train():
     agent = Agent(game)
     # game.__init__()
     turn = PLAYER
+    AiGamesWon = 0
     while True:  # training loop
         if done:
             # train long memory, plot result
+            done = False
             game.reset()
+            
             agent.n_games += 1
             agent.train_long_memory()
-
+            if game.WhoWon == AI:
+                AiGamesWon += 1
+                agent.model.save()
             if score > record and game.WhoWon == AI:  # highest score
                 record = score
                 agent.model.save()
+                score = 0
             if game.WhoWon == PLAYER:
                 score = 0
 
             print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record, "\n    - Who Won? : ", game.WhoWon)
-
-            plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.n_games
+            
+            plot_scores.append((AiGamesWon/agent.n_games)*100)
+            total_score += AiGamesWon
+            mean_score = AiGamesWon / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
             # Set Teams
+            score = 0
             turn = random.randint(PLAYER, AI)
             if(PLAYER == redTeam):
                 PLAYER = redTeam
@@ -231,8 +254,12 @@ def train():
             # train long memory, plot result
             done = False
             game.reset()
+            
             agent.n_games += 1
             agent.train_long_memory()
+            if game.WhoWon == AI:
+                AiGamesWon += 1
+                agent.model.save()
 
             if score > record and game.WhoWon == AI:  # highest score
                 record = score
@@ -240,14 +267,15 @@ def train():
             if game.WhoWon == PLAYER:
                 score = 0
 
-            print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record)
+            print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record, "\n    - Who Won? : ", game.WhoWon)
 
-            plot_scores.append(score)
-            total_score += score
+            plot_scores.append((AiGamesWon/agent.n_games)*100)
+            total_score += AiGamesWon
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
             # Set Teams
+            score = 0
             turn = random.randint(PLAYER, AI)
             if(PLAYER == redTeam):
                 PLAYER = redTeam
@@ -259,7 +287,10 @@ def train():
         if turn == PLAYER:
             print("Your move!\n")
             if turn == blueTeam:
-                action = get_user_action() #get user input 
+                 
+                action = get_user_action() #get user input
+                while game._calc_valid_move(action)!=True:
+                    action = get_user_action()
                 done = game.play_step(action, blueTeam)
             if turn == redTeam:
                 action = get_user_action() #get user input 
@@ -271,9 +302,6 @@ def train():
             print("\n\n\n\n\n\nRound: ", (game.round),"\n")
 
             plt.plot(label = turn)
-
-        
-
 
 
 if __name__ == "__main__":
