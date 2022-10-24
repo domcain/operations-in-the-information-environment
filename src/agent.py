@@ -1,5 +1,6 @@
 from math import gamma
 import random
+from socket import AI_ALL
 import sys
 import os
 import numpy as np
@@ -213,9 +214,11 @@ def train():
             agent.n_games += 1
             agent.train_long_memory()
 
-            if score > record:  # highest score
+            if score > record and game.WhoWon == AI:  # highest score
                 record = score
                 agent.model.save()
+            if game.WhoWon == PLAYER:
+                score = 0
 
             print("Game", agent.n_games, "Score", score, "Record", record)
             plot_scores.append(score)
@@ -223,7 +226,6 @@ def train():
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
-            # TODO: plot
 
 
 if __name__ == "__main__":
