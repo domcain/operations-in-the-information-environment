@@ -156,7 +156,7 @@ class AAAI_Game:
         plt.show()
         
         self.score = 0
-        self.round = 0
+        # self.round = 0
         
 
     # If the game has run its' course, stop and return the current score.
@@ -175,11 +175,13 @@ class AAAI_Game:
         if turn == PLAYER:
             self._move(action, PLAYER)
             game_over = False
+            self.round += 0.5
 
-            # if self.round_limit(self.round):
-            #     game_over = True
-            #     reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over)
-            #     return reward, game_over, self.score
+            if self.round_limit(self.round):
+                game_over = True
+                reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over)
+                return game_over
+            
             self._update_ui()
             # self.update_graph(self.G)
             if self.isGrey == True:
@@ -205,7 +207,6 @@ class AAAI_Game:
                 self.isGrey = False
             
             self.round += 0.5
-
             # If Game is finished
             if self.round_limit(self.round):
                 game_over = True
@@ -213,6 +214,7 @@ class AAAI_Game:
                 return reward, game_over, self.score
 
             # 6. return game over and score
+            
             return reward, game_over, self.score
 
     def get_score(self, score):
@@ -231,7 +233,7 @@ class AAAI_Game:
 
     # Checker function to see if the game has finished.
     def round_limit(self, round):
-        if round > 1:
+        if round >= 30:
             return True
         return False
     

@@ -24,7 +24,6 @@ blueTeam = 0
 NoOfActions = 5
 
 
-# add 
 turn = PLAYER
 class Agent:
     def __init__(self, game):
@@ -41,12 +40,9 @@ class Agent:
 
     def get_state(self, game):  # in video 11 states/values
         WillVote, WontVote = game._update_will_vote_values(game.G) #returns the amount of green nodes voting
-        # print("Voting Array: ", WillVote)
-        # print("Not Voting Array: ", WontVote)
         state = np.concatenate((WillVote,WontVote))
-        # print("state: ", state)
-        return np.array(state,dtype=int)
         # will return an array of state values
+        return np.array(state,dtype=int)
 
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append(
@@ -185,7 +181,7 @@ def train():
             if game.WhoWon == PLAYER:
                 score = 0
 
-            print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record)
+            print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record, "\n    - Who Won? : ", game.WhoWon)
 
             plot_scores.append(score)
             total_score += score
@@ -228,7 +224,7 @@ def train():
             turn = turn % 2
             # game.round += 0.5
             
-            print("\n\n\n\n\n\nRound: ", str((1+game.round)/2), "\n")
+            print("\n\n\n\n\n\nRound: ", game.round, "\n")
             plt.plot(label = turn)
         
         if done:
@@ -267,12 +263,12 @@ def train():
                 done = game.play_step(action, blueTeam)
             if turn == redTeam:
                 action = get_user_action() #get user input 
-                game.play_step(action, redTeam)
+                done = game.play_step(action, redTeam)
             
             turn += 1
             turn = turn % 2
             # game.round += 0.5
-            print("\n\n\n\n\n\nRound: " + str((1+game.round)/2),"\n")
+            print("\n\n\n\n\n\nRound: ", (game.round),"\n")
 
             plt.plot(label = turn)
 
