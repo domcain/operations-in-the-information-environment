@@ -167,13 +167,15 @@ class AAAI_Game:
         StartingBudgetAUD = 250000
         CurrentBalance = StartingBudgetAUD
         self.NumberOfGreyAgents = NumberOfGreyAgents
-        PLAYER = random.randint(blueTeam,redTeam)
-        if(PLAYER == redTeam):
-            PLAYER = redTeam
-            AI = blueTeam
-        else:
-            PLAYER = blueTeam
-            AI = redTeam
+        # PLAYER = random.randint(blueTeam,redTeam)
+        # if(PLAYER == redTeam):
+        #     PLAYER = redTeam
+        #     AI = blueTeam
+        # else:
+        #     PLAYER = blueTeam
+        #     AI = redTeam
+        AI = 0
+        PLAYER = 1
         return PLAYER, AI
         
         
@@ -330,7 +332,7 @@ class AAAI_Game:
             return True
         if action == 5 and self.NumberOfGreyAgents == 0:
             return False 
-        CostOfMove = (StartingBudgetAUD * multiplierDict[action])/10
+        CostOfMove = (StartingBudgetAUD * multiplierDict[action])
         if CurrentBalance >= CostOfMove:
             return True
         if CurrentBalance < CostOfMove and self.NumberOfGreyAgents == 0:
@@ -344,7 +346,7 @@ class AAAI_Game:
     def _move(self, action, team):
         global StartingBudgetAUD, CurrentBalance, round, reward, MaxCertainty, MinCertainty
         if action<= 4:
-            CostOfMove = (StartingBudgetAUD * multiplierDict[action])/10
+            CostOfMove = (StartingBudgetAUD * multiplierDict[action])
             if team == blueTeam and CurrentBalance >= CostOfMove:
                 for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                     PrevWillVote = self.G.nodes[n]["Will Vote"]
@@ -402,23 +404,23 @@ class AAAI_Game:
         if game_over:
             if AI == blueTeam:
                 if TotalVoting > TotalNotVoting:
-                    reward = 100000000000
+                    reward = 100
                     self.WhoWon = AI
                     # AI WINS !
                     return reward
                 if TotalVoting < TotalNotVoting:
-                    reward = -10000000000
+                    reward = -100
                     self.WhoWon = PLAYER
                     # AI LOSES !
                     return reward
             if AI == redTeam:
                 if TotalVoting > TotalNotVoting:
-                    reward = -10000000000
+                    reward = -100
                     self.WhoWon = PLAYER
                     # AI LOSES !
                     return reward
                 if TotalVoting < TotalNotVoting:
-                    reward = 10000000000
+                    reward = 100
                     self.WhoWon = AI
                     # AI WINS !
                     return reward

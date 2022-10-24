@@ -273,7 +273,7 @@ def train():
                     agent.red_model.save()
                 if AI == blueTeam:
                     agent.blue_model.save()
-                score = 0
+                score += 1
             if game.WhoWon == PLAYER:
                 AiGamesLost += 1
                 score = 0
@@ -288,8 +288,8 @@ def train():
             plot(plot_scores, plot_mean_scores)
             # Set Teams
             PLAYER, AI = game.reset()
-            AI = 1
-            PLAYER = 0
+            # AI = 1
+            # PLAYER = 0
             score = 0
             turn = redTeam
 
@@ -332,6 +332,7 @@ def train():
             agent.train_long_memory()
             if game.WhoWon == AI:
                 AiGamesWon += 1
+                score += 1
                 if AI == redTeam:
                     agent.red_model.save()
                 if AI == blueTeam:
@@ -345,6 +346,7 @@ def train():
                 score = 0
             if game.WhoWon == PLAYER:
                 AiGamesLost += 1
+                score = 0
 
             print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record, "\n    - Who Won? : ", game.WhoWon)
 
@@ -356,8 +358,8 @@ def train():
             # Set Teams
             score = 0
             PLAYER, AI = game.reset()
-            AI = 1
-            PLAYER = 0
+            # AI = 1
+            # PLAYER = 0
             turn = redTeam
 
         if turn == PLAYER:
