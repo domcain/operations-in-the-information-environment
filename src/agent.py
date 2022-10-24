@@ -1,9 +1,9 @@
 from math import gamma
+import math
 import random
 from socket import AI_ALL
 import sys
 import os
-import numpy as np
 from collections import deque
 import torch
 from game import AAAI_Game, NumberOfGreyAgents, CurrentBalance, CostOfMove
@@ -24,7 +24,7 @@ blueTeam = 0
 NoOfActions = 5
 
 #Set to True to test with random moves
-isTesting = True 
+isTesting = False 
 
 turn = redTeam
 class Agent:
@@ -35,7 +35,7 @@ class Agent:
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when memory is full
         self.model = Linear_QNet(
         
-            game.NumberOfNodes, 256, NoOfActions #7 needs to chane to AI red or blue moves 
+            game.NumberOfNodes, 256, 7 #7 needs to chane to AI red or blue moves 
 
         )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -84,7 +84,8 @@ class Agent:
             else:
                 state0 = torch.tensor(state, dtype=torch.float)
                 prediction = self.model(state0)  # will execute forward function
-                # print("Prediction: ", prediction)
+                prediction[5] = -math.inf
+                prediction[6] = -math.inf
                 move = torch.argmax(prediction).item()
                 final_move[move] = 1
 
@@ -147,7 +148,17 @@ def get_user_action():
     level = 0
     if PLAYER == redTeam:
         if isTesting:
-            return random.randint(0,4)
+            # Soft Approach
+            return 0
+            
+            # Hard Approach
+            # return 2
+
+            # Hard Approach
+            return 4
+
+            # Random Completely
+            # return random.randint(0,4)
         while 1 > level or 5 < level:
             try:
                 level = int(input("Red Team Options: \n", "    - Enter a message potency of your choice (1 - 5) \n"))
@@ -157,12 +168,23 @@ def get_user_action():
     if PLAYER == blueTeam:
         print("Blue Team Options: \n" , "    - Enter a message potency level between (1 - 5)\n", "    - Inject a GREY agent (6)\n","    - Skip a turn (7)\n")
         if isTesting:
-            while True:
-                level = random.randint(0,6)
-                if level == 6 and NumberOfGreyAgents == 0:
-                    continue
-                else:
-                    return level
+            # Soft Approach
+            return 0
+
+            # Medium Approach
+            # return 2
+
+                # Hard Approach
+                # return 4
+
+            # while True:
+                
+            #     # Random Completely
+            #     level = random.randint(0,6)
+            #     if level == 6 and NumberOfGreyAgents == 0:
+            #         continue
+            #     else:
+            #         return level
 
         while True:
             try:
@@ -186,19 +208,28 @@ def train():
     plot_scores = []  # track scores
     plot_mean_scores = []  # average scores
     total_score = 0
+    total_lost = 0
     final_move_index = 0
     record = 0
     done = False
     game = AAAI_Game()
     agent = Agent(game)
     # game.__init__()
-    turn = PLAYER
+    # turn = PLAYER
     AiGamesWon = 0
+    AiGamesLost = 0
+    turn = random.randint(PLAYER, AI)
+    if(PLAYER == redTeam):
+        PLAYER = redTeam
+        AI = blueTeam
+    else:
+        PLAYER = blueTeam
+        AI = redTeam
     while True:  # training loop
         if done:
             # If game is over, train long-term memory and plot the result
             done = False
-            game.reset()
+            
             
             agent.n_games += 1
             agent.train_long_memory()
@@ -210,37 +241,36 @@ def train():
                 agent.model.save()
                 score = 0
             if game.WhoWon == PLAYER:
-                score = 0
-
+                AiGamesLost += 1
+            
             print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record, "\n    - Who Won? : ", game.WhoWon)
             
             plot_scores.append((AiGamesWon/agent.n_games)*100)
             total_score += AiGamesWon
-            mean_score = AiGamesWon / agent.n_games
-            plot_mean_scores.append(mean_score)
+            total_lost += AiGamesLost
+            # mean_score = AiGamesWon / agent.n_games
+            plot_mean_scores.append(AiGamesWon)
             plot(plot_scores, plot_mean_scores)
             # Set Teams
+            PLAYER, AI = game.reset()
+           
             score = 0
-            turn = random.randint(PLAYER, AI)
-            if(PLAYER == redTeam):
-                PLAYER = redTeam
-                AI = blueTeam
-            else:
-                PLAYER = blueTeam
-                AI = redTeam
+            turn = redTeam
+
                 
         if turn == AI:
             print("Your oponent's move!\n")
             if AI == blueTeam:
-                NoOfActions = 7
+                agent.NoOfActions = 7
             if AI == redTeam:
-                NoOfActions = 5
+                agent.NoOfActions = 5
             # get current state
             current_state = agent.get_state(game)
 
             # get move
             final_move = agent.get_action(current_state)
             final_move_index = final_move.index(1)
+
             # perform move and get new state
             reward, done, score = game.play_step(final_move_index, turn)
             display_message(final_move_index, AI)
@@ -262,8 +292,6 @@ def train():
         if done:
             # train long memory, plot result
             done = False
-            game.reset()
-            
             agent.n_games += 1
             agent.train_long_memory()
             if game.WhoWon == AI:
@@ -280,18 +308,13 @@ def train():
 
             plot_scores.append((AiGamesWon/agent.n_games)*100)
             total_score += AiGamesWon
-            mean_score = total_score / agent.n_games
-            plot_mean_scores.append(mean_score)
+            total_lost = AiGamesLost
+            plot_mean_scores.append(AiGamesWon)
             plot(plot_scores, plot_mean_scores)
             # Set Teams
             score = 0
-            turn = random.randint(PLAYER, AI)
-            if(PLAYER == redTeam):
-                PLAYER = redTeam
-                AI = blueTeam
-            else:
-                PLAYER = blueTeam
-                AI = redTeam
+            PLAYER, AI = game.reset()
+            turn = redTeam
 
         if turn == PLAYER:
             print("Your move!\n")
@@ -303,7 +326,8 @@ def train():
                         if game._calc_valid_move(action)==6:
                             action == 6
                             break
-                        else:action = get_user_action()
+                        else:
+                            action = get_user_action()
                     done = game.play_step(action, blueTeam)
                 if action == 6:
                     done = game.play_step(action, blueTeam)

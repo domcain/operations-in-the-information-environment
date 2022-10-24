@@ -16,8 +16,8 @@ NumberOfGreyAgents = 5                              # Number of times Blue can i
 RedSpyProportion = 0.5                              # How likely is a foreign power to be bad 
 
 # Certainty related variables
-LowCertainty = -0.1                                 # The certainty below which the agents know a node will NOT vote in the election
-HighCertainty = 0.1                                 # The certainty above which the agents know a node will vote in the election
+LowCertainty = -0.5                                 # The certainty below which the agents know a node will NOT vote in the election
+HighCertainty = 0.5                                 # The certainty above which the agents know a node will vote in the election
 VoteThreshold = (HighCertainty + LowCertainty) / 2  # A certainty level, above which a green node will vote in the election.
 MaxCertainty = 1.0
 MinCertainty = -1.0
@@ -141,8 +141,12 @@ class AAAI_Game:
         global PLAYER, AI, turn, TotalVoting, TotalNotVoting, StartingBudgetAUD, CurrentBalance
         print("\nNEW GAME\n")
         # init game state
+        self.G.clear()
+        plt.clf()
+        nx.draw(self.G, node_color="Green", with_labels=1)
+        
         self.G = nx.gnp_random_graph(NumberOfNodes, ProbabilityOfConnection)
- 
+        
         for i in self.G.nodes:
             self.G.nodes[i]["Team"] = "Green"
             self.G.nodes[i]["Certainty"] = random.uniform(LowCertainty,HighCertainty)
@@ -164,6 +168,15 @@ class AAAI_Game:
         StartingBudgetAUD = 250000
         CurrentBalance = StartingBudgetAUD
         self.NumberOfGreyAgents = NumberOfGreyAgents
+        PLAYER = random.randint(blueTeam,redTeam)
+        if(PLAYER == redTeam):
+            PLAYER = redTeam
+            AI = blueTeam
+        else:
+            PLAYER = blueTeam
+            AI = redTeam
+        return PLAYER, AI
+        
         
 
     # If the game has run its' course, stop and return the current score.
@@ -194,13 +207,12 @@ class AAAI_Game:
             if self.isGrey == True:
                 self.isGrey = False
             return game_over
-        else:
+        
+        if turn == AI:
             self._move(action, AI)  # Choose move (update the head)
             # 3. check if game over
             game_over = False
             self.score = self.get_score(self.score)
-
-            
 
             # 4. place new food or just move
             # old_reward = reward
@@ -324,6 +336,8 @@ class AAAI_Game:
             return True
         if CurrentBalance < CostOfMove and self.NumberOfGreyAgents == 0:
             return 6
+        if CurrentBalance == 0:
+            return 6
         else:
             print("You do not have enough money :( Try another move\n")
             return False
@@ -334,12 +348,9 @@ class AAAI_Game:
             CostOfMove = (StartingBudgetAUD * multiplierDict[action])/10
             if team == blueTeam and CurrentBalance >= CostOfMove:
                 for n in self.G.nodes: #add multiplier for each message level then affect blue budget
-                    print(" self.G.nodes[",n,"]: ",  self.G.nodes[n]["Certainty"])
                     PrevWillVote = self.G.nodes[n]["Will Vote"]
                     PrevCertainty = self.G.nodes[n]["Certainty"]
-                    self.G.nodes[n]["Certainty"] += abs(self.G.nodes[n]["Certainty"]) * multiplierDict[action]
-                    print("NEW self.G.nodes[",n,"]: ",  self.G.nodes[n]["Certainty"])
-                    
+                    self.G.nodes[n]["Certainty"] += abs(self.G.nodes[n]["Certainty"]) * multiplierDict[action]                    
                     if self.G.nodes[n]["Certainty"] > HighCertainty:
                         self.G.nodes[n]["Will Vote"] = True
                    
@@ -360,7 +371,10 @@ class AAAI_Game:
         elif team == blueTeam and action == 5 and self.isGrey == False:
             self.isGrey = True
             # TODO: introduce_grey_agent()
-            grey_type = random.randint(PLAYER, AI)
+            if PLAYER == 0:
+                grey_type = random.randint(PLAYER, AI)
+            if PLAYER == 1:
+                grey_type = random.randint(AI, PLAYER)
             grey_action = random.randint(0,4)
             self.NumberOfGreyAgents -= 1
             self.play_step(grey_action, grey_type)
@@ -389,18 +403,18 @@ class AAAI_Game:
         if game_over:
             if AI == blueTeam:
                 if TotalVoting > TotalNotVoting:
-                    reward = 100
+                    reward = 10000
                     self.WhoWon = AI
                     # AI WINS !
                     return reward
                 if TotalVoting < TotalNotVoting:
-                    reward = -100
+                    reward = -10000
                     self.WhoWon = PLAYER
                     # AI LOSES !
                     return reward
             if AI == redTeam:
                 if TotalVoting > TotalNotVoting:
-                    reward = -100
+                    reward = -10000
                     self.WhoWon = PLAYER
                     # AI LOSES !
                     return reward
@@ -425,7 +439,8 @@ class AAAI_Game:
 
         # calculate how big the reward Would be:
         PercentageChangeInVoters = curr_TeamVoting / old_TeamVoting
-        PercentageChangeInNonVoters = curr_TeamNotVoting / old_TeamNotVoting 
+        PercentageChangeInNonVoters = curr_TeamNotVoting / old_TeamNotVoting
+         
         
         # More people (appear to be?) voting
         if old_TeamVoting < curr_TeamVoting:
