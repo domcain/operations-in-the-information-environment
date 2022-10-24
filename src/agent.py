@@ -289,7 +289,7 @@ def train():
             if turn == blueTeam:
                  
                 action = get_user_action() #get user input
-                while game._calc_valid_move(action)!=True:
+                while game._calc_valid_move(action)!=False:
                     action = get_user_action()
                 done = game.play_step(action, blueTeam)
             if turn == redTeam:
