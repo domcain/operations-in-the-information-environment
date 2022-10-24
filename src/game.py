@@ -67,7 +67,7 @@ class AAAI_Game:
         self.score = 0
         self.isGrey = False
         self.round = 0
-        self.whoWon = AI
+        self.WhoWon = AI
         
         # self.reset()
 
