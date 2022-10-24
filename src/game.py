@@ -68,6 +68,7 @@ class AAAI_Game:
         self.isGrey = False
         self.round = 0
         self.whoWon = AI
+        
         # self.reset()
 
         # NumberOfNodes = int(input("Enter the size of the Green Team: "))

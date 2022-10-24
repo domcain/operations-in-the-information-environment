@@ -194,6 +194,7 @@ def train():
             turn += 1
             turn = turn % 2
             game.round += 1
+            
             print("\n\n\n\n\n\nRound: ", str((1+game.round)/2), "\n")
             plt.plot(label = turn)
 
@@ -210,6 +211,7 @@ def train():
             turn = turn % 2
             game.round += 1
             print("\n\n\n\n\n\nRound: " + str((1+game.round)/2),"\n")
+
             plt.plot(label = turn)
 
         if done:
@@ -225,11 +227,13 @@ def train():
                 score = 0
 
             print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record)
+
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
+
 
 
 if __name__ == "__main__":
