@@ -292,7 +292,7 @@ class AAAI_Game:
                 
                 if self.G.nodes[n]["Certainty"] > MaxCertainty: 
                     self.G.nodes[n]["Certainty"] = MaxCertainty
-                
+
             self._update_voting_totals(n, PrevWillVote, multiplierDict[action], blueTeam)
             # Subtract the cost of the move from the budget.
             if self.isGrey == False:
@@ -318,6 +318,7 @@ class AAAI_Game:
             for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                 PrevWillVote = self.G.nodes[n]["Will Vote"]
                 self.G.nodes[n]["Certainty"] -= abs(self.G.nodes[n]["Certainty"]) * multiplierDict[action]
+                
                 if self.G.nodes[n]["Certainty"] < MinCertainty: 
                     self.G.nodes[n]["Certainty"] = MinCertainty
             self._green_interact()
