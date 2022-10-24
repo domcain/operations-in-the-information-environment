@@ -156,14 +156,8 @@ class AAAI_Game:
         plt.show()
         
         self.score = 0
-        # Set Teams
-        turn = random.randint(PLAYER, AI)
-        if(PLAYER == redTeam):
-            PLAYER = redTeam
-            AI = blueTeam
-        else:
-            PLAYER = blueTeam
-            AI = redTeam
+        self.round = 0
+        
 
     # If the game has run its' course, stop and return the current score.
     # Otherwise, play a move and update the GUI.
@@ -172,15 +166,20 @@ class AAAI_Game:
         old_TeamVoting = TotalVoting
         old_TeamNotVoting = TotalNotVoting
         
+        if self.round_limit(self.round):
+                game_over = True
+                reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over)
+                return reward, game_over, self.score
+
         # Plays a move based upon the users input
         if turn == PLAYER:
             self._move(action, PLAYER)
             game_over = False
 
-            if self.round_limit(self.round):
-                game_over = True
-                reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over)
-                return reward, game_over, self.score
+            # if self.round_limit(self.round):
+            #     game_over = True
+            #     reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over)
+            #     return reward, game_over, self.score
             self._update_ui()
             # self.update_graph(self.G)
             if self.isGrey == True:
@@ -192,11 +191,7 @@ class AAAI_Game:
             game_over = False
             self.get_score(self.score)
 
-            # If Game is finished
-            if self.round_limit(self.round):
-                game_over = True
-                reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over) 
-                return reward, game_over, self.score
+            
 
             # 4. place new food or just move
             # old_reward = reward
@@ -208,6 +203,15 @@ class AAAI_Game:
             # self.clock.tick(SPEED)
             if self.isGrey == True:
                 self.isGrey = False
+            
+            self.round += 0.5
+
+            # If Game is finished
+            if self.round_limit(self.round):
+                game_over = True
+                reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over) 
+                return reward, game_over, self.score
+
             # 6. return game over and score
             return reward, game_over, self.score
 

@@ -158,62 +158,21 @@ def get_user_action():
             
         return level-1
 
+
+
 def train():
+    global PLAYER, AI
     plot_scores = []  # track scores
     plot_mean_scores = []  # average scores
     total_score = 0
     final_move_index = 0
     record = 0
+    done = False
     game = AAAI_Game()
     agent = Agent(game)
     # game.__init__()
     turn = PLAYER
     while True:  # training loop
-        if turn == AI:
-            print("Your oponent's move!\n")
-            if AI == blueTeam:
-                NoOfActions = 7
-            if AI == redTeam:
-                NoOfActions = 5
-            # get current state
-            current_state = agent.get_state(game)
-
-            # get move
-            final_move = agent.get_action(current_state)
-            final_move_index = final_move.index(1)
-            # perform move and get new state
-            reward, done, score = game.play_step(final_move_index, turn)
-            new_state = agent.get_state(game)
-
-            # train short-memory
-            agent.train_short_memory(current_state, final_move, reward, new_state, done)
-
-            # remember this ^
-            agent.remember(current_state, final_move, reward, new_state, done)
-
-            turn += 1
-            turn = turn % 2
-            game.round += 1
-            
-            print("\n\n\n\n\n\nRound: ", str((1+game.round)/2), "\n")
-            plt.plot(label = turn)
-
-        if turn == PLAYER:
-            print("Your move!\n")
-            if turn == blueTeam:
-                action = get_user_action() #get user input 
-                done = game.play_step(action, blueTeam)
-            if turn == redTeam:
-                action = get_user_action() #get user input 
-                game.play_step(action, redTeam)
-            
-            turn += 1
-            turn = turn % 2
-            game.round += 1
-            print("\n\n\n\n\n\nRound: " + str((1+game.round)/2),"\n")
-
-            plt.plot(label = turn)
-
         if done:
             # train long memory, plot result
             game.reset()
@@ -233,6 +192,91 @@ def train():
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
+            # Set Teams
+            turn = random.randint(PLAYER, AI)
+            if(PLAYER == redTeam):
+                PLAYER = redTeam
+                AI = blueTeam
+            else:
+                PLAYER = blueTeam
+                AI = redTeam
+                
+        if turn == AI:
+            print("Your oponent's move!\n")
+            if AI == blueTeam:
+                NoOfActions = 7
+            if AI == redTeam:
+                NoOfActions = 5
+            # get current state
+            current_state = agent.get_state(game)
+
+            # get move
+            final_move = agent.get_action(current_state)
+            final_move_index = final_move.index(1)
+            # perform move and get new state
+            reward, done, score = game.play_step(final_move_index, turn)
+            display_message(final_move_index, AI)
+            new_state = agent.get_state(game)
+
+            # train short-memory
+            agent.train_short_memory(current_state, final_move, reward, new_state, done)
+
+            # remember this ^
+            agent.remember(current_state, final_move, reward, new_state, done)
+
+            turn += 1
+            turn = turn % 2
+            # game.round += 0.5
+            
+            print("\n\n\n\n\n\nRound: ", str((1+game.round)/2), "\n")
+            plt.plot(label = turn)
+        
+        if done:
+            # train long memory, plot result
+            done = False
+            game.reset()
+            agent.n_games += 1
+            agent.train_long_memory()
+
+            if score > record and game.WhoWon == AI:  # highest score
+                record = score
+                agent.model.save()
+            if game.WhoWon == PLAYER:
+                score = 0
+
+            print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record)
+
+            plot_scores.append(score)
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
+            plot(plot_scores, plot_mean_scores)
+            # Set Teams
+            turn = random.randint(PLAYER, AI)
+            if(PLAYER == redTeam):
+                PLAYER = redTeam
+                AI = blueTeam
+            else:
+                PLAYER = blueTeam
+                AI = redTeam
+
+        if turn == PLAYER:
+            print("Your move!\n")
+            if turn == blueTeam:
+                action = get_user_action() #get user input 
+                done = game.play_step(action, blueTeam)
+            if turn == redTeam:
+                action = get_user_action() #get user input 
+                game.play_step(action, redTeam)
+            
+            turn += 1
+            turn = turn % 2
+            # game.round += 0.5
+            print("\n\n\n\n\n\nRound: " + str((1+game.round)/2),"\n")
+
+            plt.plot(label = turn)
+
+        
 
 
 
