@@ -223,7 +223,7 @@ class AAAI_Game:
 
     # Checker function to see if the game has finished.
     def round_limit(self, round=0):
-        if round > 20:
+        if round > 1:
             return True
         return False
     
