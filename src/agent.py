@@ -160,11 +160,7 @@ def get_user_action():
                     print("Maximum number of grey agents have been played, try another move:\n")
                     continue
                 if level >= 1 and level <= 7:
-                    if AAAI_Game().calc_valid_move(level-1):
-                        break
-                    else:
-                        print("You don't have enough money! Try another move :(\n")
-                        continue
+                    break
             except ValueError:
                 print("That wasn't an integer :(\n")
             
@@ -289,9 +285,12 @@ def train():
             if turn == blueTeam:
                  
                 action = get_user_action() #get user input
-                while game._calc_valid_move(action)!=False:
-                    action = get_user_action()
-                done = game.play_step(action, blueTeam)
+                if action != 6:
+                    while game._calc_valid_move(action)!=True:
+                        action = get_user_action()
+                        done = game.play_step(action, blueTeam)
+                if action == 6:
+                    done = game.play_step(action, blueTeam)
             if turn == redTeam:
                 action = get_user_action() #get user input 
                 done = game.play_step(action, redTeam)
