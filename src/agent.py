@@ -3,18 +3,17 @@ import math
 import random
 from socket import AI_ALL
 import sys
-import os
 from collections import deque
 import torch
 from game import AAAI_Game, NumberOfGreyAgents, CurrentBalance, CostOfMove
-from model import Linear_QNet, QTrainer
+from model import Red_Linear_QNet, Blue_Linear_QNet, Blue_QTrainer, Red_QTrainer
 import numpy as np
 import networkx as nx
 from helper import plot
 import matplotlib.pyplot as plt
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
+MAX_MEMORY = 200_000
+BATCH_SIZE = 2000
 LR = 0.001  # LEARNING RATE
 
 PLAYER = 0
@@ -24,7 +23,7 @@ blueTeam = 0
 NoOfActions = 5
 
 #Set to True to test with random moves
-isTesting = False 
+isTesting = True 
 
 turn = redTeam
 class Agent:
@@ -32,14 +31,20 @@ class Agent:
         self.n_games = 0  # max 50
         self.epsilon = 0  # randomness level
         self.gamma = 0.9  # discount rate, smaller than 1
-        self.memory = deque(maxlen=MAX_MEMORY)  # popleft() when memory is full
-        self.model = Linear_QNet(
+        self.red_memory = deque(maxlen=MAX_MEMORY)  # popleft() when memory is full
+        self.blue_memory = deque(maxlen=MAX_MEMORY)  # popleft() when memory is full
+        self.red_model = Red_Linear_QNet(
         
-            game.NumberOfNodes, 256, 7 #7 needs to chane to AI red or blue moves 
+            game.NumberOfNodes, 512, 5 #5 actions for red turn
 
         )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
-        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-        # self.NumberOfGreyAgents = game.NumberOfGreyAgents
+        self.blue_model = Blue_Linear_QNet(
+        
+            game.NumberOfNodes, 512, 7 #7 actions for blue turn
+
+        )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
+        self.blue_trainer = Blue_QTrainer(self.blue_model, lr=LR, gamma=self.gamma)
+        self.red_trainer = Red_QTrainer(self.red_model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):  # in video 11 states/values
         WillVote, WontVote = game._update_will_vote_values(game.G) #returns the amount of green nodes voting
@@ -48,26 +53,51 @@ class Agent:
         return np.array(state,dtype=int)
 
     def remember(self, state, action, reward, next_state, game_over):
-        self.memory.append(
-            (state, action, reward, next_state, game_over)
-        )  # popleft if MAX_MEMORY is full
+        if AI == blueTeam:
+            self.blue_memory.append(
+                (state, action, reward, next_state, game_over)
+            )  # popleft if MAX_MEMORY is full
+        if AI == redTeam:
+            self.red_memory.append(
+                (state, action, reward, next_state, game_over)
+            )  # popleft if MAX_MEMORY is full
 
     def train_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(
-                self.memory, BATCH_SIZE
-            )  # Returns list of tuples
-        else:
-            mini_sample = self.memory
+        if AI == blueTeam:
+            if len(self.blue_memory) > BATCH_SIZE:
+                blue_sample = random.sample(
+                    self.blue_memory, BATCH_SIZE
+                )  # Returns list of tuples
+            else:
+                blue_sample = self.blue_memory
+            
+            states, actions, rewards, next_states, game_overs = zip(
+            *blue_sample
+            )  # puts all of states, actions, rewards, next_states, dones together or iterate
+            self.blue_trainer.train_step(states, actions, rewards, next_states, game_overs)
 
-        states, actions, rewards, next_states, game_overs = zip(
-            *mini_sample
-        )  # puts all of states, actions, rewards, next_states, dones together or iterate
-        self.trainer.train_step(states, actions, rewards, next_states, game_overs)
-        # for state, action, reward, next_state, game_over in mini_sample:
+        if AI == redTeam:
+            if len(self.red_memory) > BATCH_SIZE:
+                red_sample = random.sample(
+                    self.red_memory, BATCH_SIZE
+                )  # Returns list of tuples
+            else:
+                red_sample = self.red_memory
+            states, actions, rewards, next_states, game_overs = zip(
+            *red_sample
+            )  # puts all of states, actions, rewards, next_states, dones together or iterate   
+            self.red_trainer.train_step(states, actions, rewards, next_states, game_overs)
+
+
+        # for state, action, reward, next_state, game_over in blue/red_sample:
+
+        
 
     def train_short_memory(self, state, action, reward, next_state, game_over):
-        self.trainer.train_step(state, action, reward, next_state, game_over)
+        if(AI == blueTeam):
+            self.blue_trainer.train_step(state, action, reward, next_state, game_over)
+        if(AI == redTeam):
+            self.red_trainer.train_step(state, action, reward, next_state, game_over)
 
     def get_action(self, state):
         # random moves: tradeoff between exploration and exploitation (deep learning)
@@ -75,7 +105,7 @@ class Agent:
         # the more games the smaller the epsilon (or randomness) leading to more tailored moves
         
         if AI == redTeam:  
-            final_move = [0, 0, 0, 0, 0, 0, 0]  # 5 levels of potency in ascending order
+            final_move = [0, 0, 0, 0, 0]  # 5 levels of potency in ascending order
             #Pick Random Move 
             if random.randint(0, 200) < self.epsilon: 
                 move = random.randint(0, 4)  # gives random number between 0 and 4
@@ -83,9 +113,7 @@ class Agent:
                 display_message(move, redTeam)
             else:
                 state0 = torch.tensor(state, dtype=torch.float)
-                prediction = self.model(state0)  # will execute forward function
-                prediction[5] = -math.inf
-                prediction[6] = -math.inf
+                prediction = self.red_model(state0)  # will execute forward function
                 move = torch.argmax(prediction).item()
                 final_move[move] = 1
 
@@ -109,7 +137,7 @@ class Agent:
                 
             else:
                 state0 = torch.tensor(state, dtype=torch.float)
-                prediction = self.model(state0)  # will execute forward function
+                prediction = self.blue_model(state0)  # will execute forward function
                 move = torch.argmax(prediction).item()
                 final_move[move] = 1
 
@@ -148,8 +176,8 @@ def get_user_action():
     level = 0
     if PLAYER == redTeam:
         if isTesting:
-            # Soft Approach
-            return 0
+            # # Soft Approach
+            # return 0
             
             # Hard Approach
             # return 2
@@ -235,13 +263,20 @@ def train():
             agent.train_long_memory()
             if game.WhoWon == AI:
                 AiGamesWon += 1
-                agent.model.save()
+                if AI == redTeam:
+                    agent.red_model.save()
+                if AI == blueTeam:
+                    agent.blue_model.save()
             if score > record and game.WhoWon == AI:  # highest score
                 record = score
-                agent.model.save()
+                if AI == redTeam:
+                    agent.red_model.save()
+                if AI == blueTeam:
+                    agent.blue_model.save()
                 score = 0
             if game.WhoWon == PLAYER:
                 AiGamesLost += 1
+                score = 0
             
             print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record, "\n    - Who Won? : ", game.WhoWon)
             
@@ -253,7 +288,8 @@ def train():
             plot(plot_scores, plot_mean_scores)
             # Set Teams
             PLAYER, AI = game.reset()
-           
+            AI = 1
+            PLAYER = 0
             score = 0
             turn = redTeam
 
@@ -296,13 +332,19 @@ def train():
             agent.train_long_memory()
             if game.WhoWon == AI:
                 AiGamesWon += 1
-                agent.model.save()
-
+                if AI == redTeam:
+                    agent.red_model.save()
+                if AI == blueTeam:
+                    agent.blue_model.save()
             if score > record and game.WhoWon == AI:  # highest score
                 record = score
-                agent.model.save()
-            if game.WhoWon == PLAYER:
+                if AI == redTeam:
+                    agent.red_model.save()
+                if AI == blueTeam:
+                    agent.blue_model.save()
                 score = 0
+            if game.WhoWon == PLAYER:
+                AiGamesLost += 1
 
             print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record, "\n    - Who Won? : ", game.WhoWon)
 
@@ -314,6 +356,8 @@ def train():
             # Set Teams
             score = 0
             PLAYER, AI = game.reset()
+            AI = 1
+            PLAYER = 0
             turn = redTeam
 
         if turn == PLAYER:

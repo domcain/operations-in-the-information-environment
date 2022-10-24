@@ -1,6 +1,5 @@
 from matplotlib import pyplot as plt
 import random
-from enum import Enum
 from collections import namedtuple
 import numpy as np
 import networkx as nx
@@ -16,8 +15,8 @@ NumberOfGreyAgents = 5                              # Number of times Blue can i
 RedSpyProportion = 0.5                              # How likely is a foreign power to be bad 
 
 # Certainty related variables
-LowCertainty = -0.5                                 # The certainty below which the agents know a node will NOT vote in the election
-HighCertainty = 0.5                                 # The certainty above which the agents know a node will vote in the election
+LowCertainty = -0.1                                 # The certainty below which the agents know a node will NOT vote in the election
+HighCertainty = 0.1                                 # The certainty above which the agents know a node will vote in the election
 VoteThreshold = (HighCertainty + LowCertainty) / 2  # A certainty level, above which a green node will vote in the election.
 MaxCertainty = 1.0
 MinCertainty = -1.0
@@ -256,7 +255,7 @@ class AAAI_Game:
 
     # Checker function to see if the game has finished.
     def round_limit(self, round):
-        if round >= 30:
+        if round >= 14: #ELECTION DAY
             return True
         return False
     
@@ -312,7 +311,7 @@ class AAAI_Game:
     def _who_hates_red(self, action, node_id):
         node = self.G.nodes[node_id]
         # From Reds message potency, e.g. 1.x, x*10 becomes the chance of ignoring red team members.
-        IgnoreRedchance = ((1 - action) * 10)
+        IgnoreRedchance = action * 10
         # Green nodes only ignore Red when their certainty value is positive (leaning toward voting).
         if node["Certainty"] > 0.0:
             # If the Green node doesn't tolerate Red's nonsense, they will ignore them. 
@@ -403,23 +402,23 @@ class AAAI_Game:
         if game_over:
             if AI == blueTeam:
                 if TotalVoting > TotalNotVoting:
-                    reward = 10000
+                    reward = 100000000000
                     self.WhoWon = AI
                     # AI WINS !
                     return reward
                 if TotalVoting < TotalNotVoting:
-                    reward = -10000
+                    reward = -10000000000
                     self.WhoWon = PLAYER
                     # AI LOSES !
                     return reward
             if AI == redTeam:
                 if TotalVoting > TotalNotVoting:
-                    reward = -10000
+                    reward = -10000000000
                     self.WhoWon = PLAYER
                     # AI LOSES !
                     return reward
                 if TotalVoting < TotalNotVoting:
-                    reward = 100
+                    reward = 10000000000
                     self.WhoWon = AI
                     # AI WINS !
                     return reward
