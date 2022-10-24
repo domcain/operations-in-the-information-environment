@@ -6,7 +6,7 @@ import os
 import numpy as np
 from collections import deque
 import torch
-from game import AAAI_Game, NumberOfGreyAgents
+from game import AAAI_Game, NumberOfGreyAgents, CurrentBalance, CostOfMove
 from model import Linear_QNet, QTrainer
 import numpy as np
 import networkx as nx
@@ -26,7 +26,7 @@ NoOfActions = 5
 #Set to True to test with random moves
 isTesting = True 
 
-turn = PLAYER
+turn = redTeam
 class Agent:
     def __init__(self, game):
         self.n_games = 0  # max 50
@@ -39,6 +39,7 @@ class Agent:
 
         )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+        # self.NumberOfGreyAgents = game.NumberOfGreyAgents
 
     def get_state(self, game):  # in video 11 states/values
         WillVote, WontVote = game._update_will_vote_values(game.G) #returns the amount of green nodes voting
@@ -90,9 +91,21 @@ class Agent:
         if AI == blueTeam:
             final_move = [0, 0, 0, 0, 0, 0, 0]  # 5 levels of budget spend in ascending order with the last two options being play a grey agent and do nothing (respectively)
             if random.randint(0, 200) < self.epsilon:
-                move = random.randint(0, 6)  # gives random number between 0 and 6
+                while True:
+                    move = random.randint(0, 6)  # gives random number between 0 and 6 = random.randint(0,6)
+                    if CostOfMove > CurrentBalance:
+                        move = 6
+                    if move == 6 and NumberOfGreyAgents == 0:
+                        continue
+                    if NumberOfGreyAgents != 0 and move == 5:
+                        break
+                    else:
+                        break 
                 final_move[move] = 1
                 display_message(move, blueTeam)
+
+
+                
             else:
                 state0 = torch.tensor(state, dtype=torch.float)
                 prediction = self.model(state0)  # will execute forward function
@@ -183,7 +196,7 @@ def train():
     AiGamesWon = 0
     while True:  # training loop
         if done:
-            # train long memory, plot result
+            # If game is over, train long-term memory and plot the result
             done = False
             game.reset()
             
@@ -287,8 +300,11 @@ def train():
                 action = get_user_action() #get user input
                 if action != 6:
                     while game._calc_valid_move(action)!=True:
-                        action = get_user_action()
-                        done = game.play_step(action, blueTeam)
+                        if game._calc_valid_move(action)==6:
+                            action == 6
+                            break
+                        else:action = get_user_action()
+                    done = game.play_step(action, blueTeam)
                 if action == 6:
                     done = game.play_step(action, blueTeam)
             if turn == redTeam:
