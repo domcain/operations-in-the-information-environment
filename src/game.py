@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 NumberOfNodes = 20                                  # Population size of Green
 ProbabilityOfConnection = 0.3                       # Determines connectivity of the graph
 NumberOfGreyAgents = 5                              # Number of times Blue can introduce a foreign power to the population
-RedSpyProportion = 0.5                              # How likely is a foreign to be bad 
+RedSpyProportion = 0.5                              # How likely is a foreign power to be bad 
 
 # Certainty related variables
 LowCertainty = -0.5                                 # The certainty below which the agents know a node will NOT vote in the election
@@ -67,6 +67,8 @@ class AAAI_Game:
         self.score = 0
         self.isGrey = False
         self.round = 0
+        self.whoWon = AI
+        
         # self.reset()
 
         # NumberOfNodes = int(input("Enter the size of the Green Team: "))
@@ -145,7 +147,7 @@ class AAAI_Game:
             self.G.nodes[i]["Will Vote"] = None
             self.G.nodes[i]["Ignore Red"] = False
             self.G.nodes[i]["Tolerance"] = Tolerance[i]
-            self._update_will_vote_values(self.G)  
+        self._update_will_vote_values(self.G)  
         
         # Build internal representation of the graph.
         nx.draw(self.G, node_color="Green", with_labels=1)
@@ -154,7 +156,6 @@ class AAAI_Game:
         plt.show()
         
         self.score = 0
-        self.frame_iteration = 0
         # Set Teams
         turn = random.randint(PLAYER, AI)
         if(PLAYER == redTeam):
@@ -176,10 +177,10 @@ class AAAI_Game:
             self._move(action, PLAYER)
             game_over = False
 
-            if self.round_limit():
+            if self.round_limit(self.round):
                 game_over = True
-                
-                return game_over, self.score
+                reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over)
+                return reward, game_over, self.score
             self._update_ui()
             # self.update_graph(self.G)
             if self.isGrey == True:
@@ -190,13 +191,16 @@ class AAAI_Game:
             # 3. check if game over
             game_over = False
             self.get_score(self.score)
-            if self.round_limit():
+
+            # If Game is finished
+            if self.round_limit(self.round):
                 game_over = True
-                return game_over, self.score
+                reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over) 
+                return reward, game_over, self.score
 
             # 4. place new food or just move
             # old_reward = reward
-            reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn)
+            reward = self._get_reward(old_TeamVoting, old_TeamNotVoting, turn, game_over)
             
             # 5. update ui and clock
             self._update_ui()
@@ -211,19 +215,19 @@ class AAAI_Game:
         global TotalVoting, TotalNotVoting
         if AI == blueTeam:
             if TotalVoting > TotalNotVoting:
-                score = 1
+                score += 1
             else:
                 score = 0
         if AI == redTeam:
             if TotalNotVoting > TotalVoting:
-                score = 1
+                score += 1
         else:
                 score = 0 
         return score
 
     # Checker function to see if the game has finished.
-    def round_limit(self, round=0):
-        if round > 20:
+    def round_limit(self, round):
+        if round > 1:
             return True
         return False
     
@@ -325,8 +329,34 @@ class AAAI_Game:
             self._update_voting_totals(n, PrevWillVote, multiplierDict[action], redTeam)
 
     # Gifts a reasonable reward or punishment to the agent based upon changes to the voting totals.
-    def _get_reward(self,old_TeamVoting, old_TeamNotVoting, team):
+    def _get_reward(self,old_TeamVoting, old_TeamNotVoting, team, game_over):
         global TotalVoting, TotalNotVoting
+        
+        # Give a big reward if AI wins, otherwise give negative reinforcement
+        if game_over:
+            if AI == blueTeam:
+                if TotalVoting > TotalNotVoting:
+                    reward = 100
+                    self.WhoWon = AI
+                    # AI WINS !
+                    return reward
+                if TotalVoting < TotalNotVoting:
+                    reward = -100
+                    self.WhoWon = PLAYER
+                    # AI LOSES !
+                    return reward
+            if AI == redTeam:
+                if TotalVoting > TotalNotVoting:
+                    reward = -100
+                    self.WhoWon = PLAYER
+                    # AI LOSES !
+                    return reward
+                if TotalVoting < TotalNotVoting:
+                    reward = 100
+                    self.WhoWon = AI
+                    # AI WINS !
+                    return reward
+
         
         # Reset the reward from the previous player
         reward = 0

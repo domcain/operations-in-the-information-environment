@@ -66,7 +66,7 @@ class QTrainer:
         # pred.clone()
         # preds[argmax(action)] = Q_new
         self.optimiser.zero_grad()  # empty gradient for pytorch
-        loss = self.criterion(target, pred)  # Q_new and Q
-        loss.backward()
+        loss = self.criterion(target, pred)  # Q_new and Q respectively
+        loss.backward() #Apply a backward pass
 
         self.optimiser.step()

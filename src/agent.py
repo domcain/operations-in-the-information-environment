@@ -1,5 +1,6 @@
 from math import gamma
 import random
+from socket import AI_ALL
 import sys
 import os
 import numpy as np
@@ -40,10 +41,10 @@ class Agent:
 
     def get_state(self, game):  # in video 11 states/values
         WillVote, WontVote = game._update_will_vote_values(game.G) #returns the amount of green nodes voting
-        print("Voting Array: ", WillVote)
-        print("Not Voting Array: ", WontVote)
+        # print("Voting Array: ", WillVote)
+        # print("Not Voting Array: ", WontVote)
         state = np.concatenate((WillVote,WontVote))
-        print("state: ", state)
+        # print("state: ", state)
         return np.array(state,dtype=int)
         # will return an array of state values
 
@@ -84,7 +85,7 @@ class Agent:
             else:
                 state0 = torch.tensor(state, dtype=torch.float)
                 prediction = self.model(state0)  # will execute forward function
-                print("Prediction: ", prediction)
+                # print("Prediction: ", prediction)
                 move = torch.argmax(prediction).item()
                 final_move[move] = 1
 
@@ -136,12 +137,12 @@ def get_user_action():
     if PLAYER == redTeam:
         while 1 > level or 5 < level:
             try:
-                level = int(input("Enter a message potency level between 1 - 5: "))
+                level = int(input("Red Team Options: \n", "    - Enter a message potency of your choice (1 - 5) \n"))
             except ValueError:
                 print("That wasn't an integer :(\n")
         return level-1
     if PLAYER == blueTeam:
-        print("Enter a message potency level between 1 - 5\n","     OR      \n", "Type 6 to inject a GREY agent\n","     OR      \n","Type 7 to Skip a turn: ")
+        print("Blue Team Options: \n" , "    - Enter a message potency level between (1 - 5)\n", "    - Inject a GREY agent (6)\n","    - Skip a turn (7)\n")
         while True:
             try:
                 level = int(input())
@@ -169,6 +170,7 @@ def train():
     turn = PLAYER
     while True:  # training loop
         if turn == AI:
+            print("Your oponent's move!\n")
             if AI == blueTeam:
                 NoOfActions = 7
             if AI == redTeam:
@@ -192,9 +194,12 @@ def train():
             turn += 1
             turn = turn % 2
             game.round += 1
+            
+            print("\n\n\n\n\n\nRound: ", str((1+game.round)/2), "\n")
             plt.plot(label = turn)
 
         if turn == PLAYER:
+            print("Your move!\n")
             if turn == blueTeam:
                 action = get_user_action() #get user input 
                 done = game.play_step(action, blueTeam)
@@ -205,6 +210,8 @@ def train():
             turn += 1
             turn = turn % 2
             game.round += 1
+            print("\n\n\n\n\n\nRound: " + str((1+game.round)/2),"\n")
+
             plt.plot(label = turn)
 
         if done:
@@ -213,17 +220,20 @@ def train():
             agent.n_games += 1
             agent.train_long_memory()
 
-            if score > record:  # highest score
+            if score > record and game.WhoWon == AI:  # highest score
                 record = score
                 agent.model.save()
+            if game.WhoWon == PLAYER:
+                score = 0
 
-            print("Game", agent.n_games, "Score", score, "Record", record)
+            print("RESULTS:","\n    - Game: ", agent.n_games, "\n    - Score: ", score, "\n    - Record: ", record)
+
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
-            # TODO: plot
+
 
 
 if __name__ == "__main__":
