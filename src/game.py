@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 NumberOfNodes = 20                                  # Population size of Green
 ProbabilityOfConnection = 0.3                       # Determines connectivity of the graph
 NumberOfGreyAgents = 5                              # Number of times Blue can introduce a foreign power to the population
-RedSpyProportion = 0.5                              # How likely is a foreign to be bad 
+RedSpyProportion = 0.5                              # How likely is a foreign power to be bad 
 
 # Certainty related variables
 LowCertainty = -0.5                                 # The certainty below which the agents know a node will NOT vote in the election
@@ -145,7 +145,7 @@ class AAAI_Game:
             self.G.nodes[i]["Will Vote"] = None
             self.G.nodes[i]["Ignore Red"] = False
             self.G.nodes[i]["Tolerance"] = Tolerance[i]
-            self._update_will_vote_values(self.G)  
+        self._update_will_vote_values(self.G)  
         
         # Build internal representation of the graph.
         nx.draw(self.G, node_color="Green", with_labels=1)
@@ -154,7 +154,6 @@ class AAAI_Game:
         plt.show()
         
         self.score = 0
-        self.frame_iteration = 0
         # Set Teams
         turn = random.randint(PLAYER, AI)
         if(PLAYER == redTeam):
@@ -176,7 +175,7 @@ class AAAI_Game:
             self._move(action, PLAYER)
             game_over = False
 
-            if self.round_limit():
+            if self.round_limit(self.round):
                 game_over = True
                 
                 return game_over, self.score
@@ -190,7 +189,7 @@ class AAAI_Game:
             # 3. check if game over
             game_over = False
             self.get_score(self.score)
-            if self.round_limit():
+            if self.round_limit(self.round):
                 game_over = True
                 return game_over, self.score
 
@@ -222,7 +221,7 @@ class AAAI_Game:
         return score
 
     # Checker function to see if the game has finished.
-    def round_limit(self, round=0):
+    def round_limit(self, round):
         if round > 1:
             return True
         return False
