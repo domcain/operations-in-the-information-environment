@@ -19,7 +19,7 @@ class Blue_Linear_QNet(nn.Module):
 
     # Saves model to file
     def save(self, file_name="blue_model.pth"): 
-        model_folder_path = "./model"
+        model_folder_path = "./blue_model"
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
 
@@ -41,7 +41,7 @@ class Red_Linear_QNet(nn.Module):
 
     # Saves model to file
     def save(self, file_name="red_model.pth"): 
-        model_folder_path = "./model"
+        model_folder_path = "./red_model"
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
 

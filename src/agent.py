@@ -25,7 +25,7 @@ NoOfActions = 5
 #Set to True to test with random moves
 isTesting = True 
 
-turn = redTeam
+turn = blueTeam
 class Agent:
     def __init__(self, game):
         self.n_games = 0  # max 50
@@ -179,11 +179,11 @@ def get_user_action():
             # # Soft Approach
             # return 0
             
-            # Hard Approach
-            # return 2
+            # Medium Approach
+            return 3
 
             # Hard Approach
-            return 4
+            # return 4
 
             # Random Completely
             # return random.randint(0,4)
@@ -197,10 +197,10 @@ def get_user_action():
         print("Blue Team Options: \n" , "    - Enter a message potency level between (1 - 5)\n", "    - Inject a GREY agent (6)\n","    - Skip a turn (7)\n")
         if isTesting:
             # Soft Approach
-            return 0
+            return 2
 
             # Medium Approach
-            # return 2
+            # return 3
 
                 # Hard Approach
                 # return 4
@@ -257,12 +257,11 @@ def train():
         if done:
             # If game is over, train long-term memory and plot the result
             done = False
-            
-            
             agent.n_games += 1
             agent.train_long_memory()
             if game.WhoWon == AI:
                 AiGamesWon += 1
+                score += 1
                 if AI == redTeam:
                     agent.red_model.save()
                 if AI == blueTeam:
@@ -273,7 +272,6 @@ def train():
                     agent.red_model.save()
                 if AI == blueTeam:
                     agent.blue_model.save()
-                score += 1
             if game.WhoWon == PLAYER:
                 AiGamesLost += 1
                 score = 0
@@ -290,7 +288,6 @@ def train():
             PLAYER, AI = game.reset()
             # AI = 1
             # PLAYER = 0
-            score = 0
             turn = redTeam
 
                 
@@ -343,7 +340,6 @@ def train():
                     agent.red_model.save()
                 if AI == blueTeam:
                     agent.blue_model.save()
-                score = 0
             if game.WhoWon == PLAYER:
                 AiGamesLost += 1
                 score = 0

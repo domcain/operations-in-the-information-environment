@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 NumberOfNodes = 20                                  # Population size of Green
 ProbabilityOfConnection = 0.3                       # Determines connectivity of the graph
 NumberOfGreyAgents = 5                              # Number of times Blue can introduce a foreign power to the population
-RedSpyProportion = 0.5                              # How likely is a foreign power to be bad 
+RedSpyProportion = 0.01                              # How likely is a foreign power to be bad 
 
 # Certainty related variables
-LowCertainty = -0.1                                 # The certainty below which the agents know a node will NOT vote in the election
-HighCertainty = 0.1                                 # The certainty above which the agents know a node will vote in the election
+LowCertainty = -0.5                                 # The certainty below which the agents know a node will NOT vote in the election
+HighCertainty = 0.5                                 # The certainty above which the agents know a node will vote in the election
 VoteThreshold = (HighCertainty + LowCertainty) / 2  # A certainty level, above which a green node will vote in the election.
 MaxCertainty = 1.0
 MinCertainty = -1.0
@@ -160,7 +160,6 @@ class AAAI_Game:
         # Generate user interface of the graph.
         plt.show()
         
-        self.score = 0
         self.round = 0
         TotalVoting = 0
         TotalNotVoting = 0
@@ -257,7 +256,7 @@ class AAAI_Game:
 
     # Checker function to see if the game has finished.
     def round_limit(self, round):
-        if round >= 14: #ELECTION DAY
+        if round >= 7: #ELECTION DAY
             return True
         return False
     
@@ -315,13 +314,12 @@ class AAAI_Game:
         # From Reds message potency, e.g. 1.x, x*10 becomes the chance of ignoring red team members.
         IgnoreRedchance = action * 10
         # Green nodes only ignore Red when their certainty value is positive (leaning toward voting).
-        if node["Certainty"] > 0.0:
-            # If the Green node doesn't tolerate Red's nonsense, they will ignore them. 
-            if IgnoreRedchance >= node["Tolerance"]:
-                node["Ignore Red"] = True
-            # If they tolerate a bit, leave whether they ignore Red to chance (nonsense / tolerance of respective node).
-            else:
-                node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])    
+        # If the Green node doesn't tolerate Red's nonsense, they will ignore them. 
+        if IgnoreRedchance >= node["Tolerance"]:
+            node["Ignore Red"] = True
+        # If they tolerate a bit, leave whether they ignore Red to chance (nonsense / tolerance of respective node).
+        else:
+            node["Ignore Red"] = random.random()<(IgnoreRedchance/node["Tolerance"])    
         return node["Ignore Red"]            
 
     # Calls the relevant functions based upon the move selected by the player or agent.
@@ -332,7 +330,7 @@ class AAAI_Game:
             return True
         if action == 5 and self.NumberOfGreyAgents == 0:
             return False 
-        CostOfMove = (StartingBudgetAUD * multiplierDict[action])
+        CostOfMove = (StartingBudgetAUD * multiplierDict[action])/100
         if CurrentBalance >= CostOfMove:
             return True
         if CurrentBalance < CostOfMove and self.NumberOfGreyAgents == 0:
@@ -346,7 +344,7 @@ class AAAI_Game:
     def _move(self, action, team):
         global StartingBudgetAUD, CurrentBalance, round, reward, MaxCertainty, MinCertainty
         if action<= 4:
-            CostOfMove = (StartingBudgetAUD * multiplierDict[action])
+            CostOfMove = (StartingBudgetAUD * multiplierDict[action])/100
             if team == blueTeam and CurrentBalance >= CostOfMove:
                 for n in self.G.nodes: #add multiplier for each message level then affect blue budget
                     PrevWillVote = self.G.nodes[n]["Will Vote"]
@@ -371,11 +369,14 @@ class AAAI_Game:
             # Intrduce a foreign power into the game.   
         elif team == blueTeam and action == 5 and self.isGrey == False:
             self.isGrey = True
+            grey_type = 0
             # TODO: introduce_grey_agent()
             if PLAYER == 0:
-                grey_type = random.randint(PLAYER, AI)
+                if random.random() > RedSpyProportion:
+                    grey_type = blueTeam
             if PLAYER == 1:
-                grey_type = random.randint(AI, PLAYER)
+                if random.random() < RedSpyProportion:
+                    grey_type = redTeam
             grey_action = random.randint(0,4)
             self.NumberOfGreyAgents -= 1
             self.play_step(grey_action, grey_type)
