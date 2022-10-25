@@ -256,7 +256,7 @@ class AAAI_Game:
 
     # Checker function to see if the game has finished.
     def round_limit(self, round):
-        if round >= 7: #ELECTION DAY
+        if round == 7: #ELECTION WEEK!
             return True
         return False
     
