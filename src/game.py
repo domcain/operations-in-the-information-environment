@@ -6,9 +6,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import scipy as sp
 
-# TODO: if having a user play the game uncomment this
-# turn = random.randint(self.PLAYER, AI)
-
 
 # User inputed Variables
 NumberOfNodes = 30  # Population size of Green
@@ -16,7 +13,7 @@ ProbabilityOfConnection = 0.4  # Determines connectivity of the graph
 NumberOfGreyAgents = (
     5  # Number of times Blue can introduce a foreign power to the population
 )
-RedSpyProportion = 0.9  # How likely is a foreign power to be bad
+RedSpyProportion = 0.75  # How likely is a foreign power to be bad
 
 # Certainty related variables
 LowCertainty = (
@@ -44,8 +41,13 @@ Tolerance = ToleranceFloat.astype(
 )  # Above ^^^ creates an array of floats, convert this into an array of integers.
 
 # Agent related variables
-# self.PLAYER = 0                                          #
-# self.AI = 1                                              #
+
+# self.PLAYER = 0
+# self.AI = 1
+
+# TODO: if having a user play the game uncomment this
+# turn = random.randint(PLAYER, AI)
+
 TotalVoting = 0  #
 TotalNotVoting = 0  #
 blueTeam = 0  #
@@ -196,8 +198,8 @@ class AAAI_Game:
         CurrentBalance = StartingBudgetAUD
         self.NumberOfGreyAgents = NumberOfGreyAgents
 
-        # self.PLAYER = random.randint(blueTeam,redTeam)
-        # if(self.PLAYER == redTeam):
+        # self.PLAYER = random.randint(blueTeam, redTeam)
+        # if self.PLAYER == redTeam:
         #     self.PLAYER = redTeam
         #     self.AI = blueTeam
         # else:
@@ -295,7 +297,7 @@ class AAAI_Game:
 
     # Checker function to see if the game has finished.
     def round_limit(self, round):
-        if round >= 30:  # ELECTION WEEK!
+        if round >= 7:  # ELECTION WEEK!
             return True
         return False
 

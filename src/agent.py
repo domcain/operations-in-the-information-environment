@@ -1,5 +1,4 @@
 from math import gamma
-
 import math
 import random
 from socket import AI_ALL
@@ -12,6 +11,7 @@ import numpy as np
 import networkx as nx
 from helper import plot
 import matplotlib.pyplot as plt
+
 
 MAX_MEMORY = 200_000
 BATCH_SIZE = 2000
@@ -309,7 +309,7 @@ def train():
     AiGamesWon = 0
     AiGamesLost = 0
     turn = random.randint(PLAYER, AI)
-    PLAYER = redTeam  # TODO: CHANGE ME to 0 for Blue and 1 for Red for testing
+    PLAYER = blueTeam  # TODO: CHANGE ME to 0 for Blue and 1 for Red for testing
     if PLAYER == redTeam:
         #     PLAYER = redTeam
         #     AI = blueTeam

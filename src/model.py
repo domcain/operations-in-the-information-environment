@@ -1,24 +1,27 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim #optimiser
-import torch.nn.functional as F 
+import torch.optim as optim  # optimiser
+import torch.nn.functional as F
 import os
+
 
 class Blue_Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
-        self.linear1 = nn.Linear(input_size, hidden_size) #Linear Layer (see diagram)
-        self.linear2 = nn.Linear(hidden_size, output_size) #Linear Layer
+        self.linear1 = nn.Linear(input_size, hidden_size)  # Linear Layer (see diagram)
+        self.linear2 = nn.Linear(hidden_size, output_size)  # Linear Layer
 
     # Forward function gets the tensor for pytorch
     # Apply Linear layer and an activation function
-    def forward(self, x):  # x is tensor 
-        x = F.relu(self.linear1(x)) # Applies a rectified linear unit function element-wise 
-        x = self.linear2(x) 
+    def forward(self, x):  # x is tensor
+        x = F.relu(
+            self.linear1(x)
+        )  # Applies a rectified linear unit function element-wise
+        x = self.linear2(x)
         return x
 
     # Saves model to file
-    def save(self, file_name="blue_model.pth"): 
+    def save(self, file_name="blue_model.pth"):
         model_folder_path = "./blue_model"
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
@@ -26,21 +29,24 @@ class Blue_Linear_QNet(nn.Module):
         file_name = os.path.join(model_folder_path, file_name)  # filename for saving
         torch.save(self.state_dict(), file_name)
 
+
 class Red_Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
-        self.linear1 = nn.Linear(input_size, hidden_size) #Linear Layer (see diagram)
-        self.linear2 = nn.Linear(hidden_size, output_size) #Linear Layer
+        self.linear1 = nn.Linear(input_size, hidden_size)  # Linear Layer (see diagram)
+        self.linear2 = nn.Linear(hidden_size, output_size)  # Linear Layer
 
     # Forward function gets the tensor for pytorch
     # Apply Linear layer and an activation function
-    def forward(self, x):  # x is tensor 
-        x = F.relu(self.linear1(x)) # Applies a rectified linear unit function element-wise 
-        x = self.linear2(x) 
+    def forward(self, x):  # x is tensor
+        x = F.relu(
+            self.linear1(x)
+        )  # Applies a rectified linear unit function element-wise
+        x = self.linear2(x)
         return x
 
     # Saves model to file
-    def save(self, file_name="red_model.pth"): 
+    def save(self, file_name="red_model.pth"):
         model_folder_path = "./red_model"
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
@@ -54,10 +60,14 @@ class Blue_QTrainer:
         self.lr = lr
         self.gamma = gamma
         self.model = model
-        self.optimiser = optim.Adam(model.parameters(), lr=self.lr) #Using the Adam optimiser
-        self.criterion = nn.MSELoss()  # Loss function loss is mean square error 
+        self.optimiser = optim.Adam(
+            model.parameters(), lr=self.lr
+        )  # Using the Adam optimiser
+        self.criterion = nn.MSELoss()  # Loss function loss is mean square error
 
-    def train_step(self, state, action, reward, next_state, done):  # done = game over boolean
+    def train_step(
+        self, state, action, reward, next_state, done
+    ):  # done = game over boolean
         if done == True:
             print("Done is true")
         state = torch.tensor(state, dtype=torch.float)
@@ -92,19 +102,24 @@ class Blue_QTrainer:
         # preds[argmax(action)] = Q_new
         self.optimiser.zero_grad()  # empty gradient for pytorch
         loss = self.criterion(target, pred)  # Q_new and Q respectively
-        loss.backward() #Apply a backward pass
+        loss.backward()  # Apply a backward pass
 
         self.optimiser.step()
+
 
 class Red_QTrainer:
     def __init__(self, model, lr, gamma):
         self.lr = lr
         self.gamma = gamma
         self.model = model
-        self.optimiser = optim.Adam(model.parameters(), lr=self.lr) #Using the Adam optimiser
-        self.criterion = nn.MSELoss()  # Loss function loss is mean square error 
+        self.optimiser = optim.Adam(
+            model.parameters(), lr=self.lr
+        )  # Using the Adam optimiser
+        self.criterion = nn.MSELoss()  # Loss function loss is mean square error
 
-    def train_step(self, state, action, reward, next_state, done):  # done = game over boolean
+    def train_step(
+        self, state, action, reward, next_state, done
+    ):  # done = game over boolean
         state = torch.tensor(state, dtype=torch.float)
         next_state = torch.tensor(next_state, dtype=torch.float)
         action = torch.tensor(action, dtype=torch.float)
@@ -139,6 +154,6 @@ class Red_QTrainer:
         # preds[argmax(action)] = Q_new
         self.optimiser.zero_grad()  # empty gradient for pytorch
         loss = self.criterion(target, pred)  # Q_new and Q respectively
-        loss.backward() #Apply a backward pass
+        loss.backward()  # Apply a backward pass
 
         self.optimiser.step()
