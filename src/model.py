@@ -58,6 +58,8 @@ class Blue_QTrainer:
         self.criterion = nn.MSELoss()  # Loss function loss is mean square error 
 
     def train_step(self, state, action, reward, next_state, done):  # done = game over boolean
+        if done == True:
+            print("Done is true")
         state = torch.tensor(state, dtype=torch.float)
         next_state = torch.tensor(next_state, dtype=torch.float)
         action = torch.tensor(action, dtype=torch.float)
@@ -76,6 +78,7 @@ class Blue_QTrainer:
         pred = self.model(state)  # state0
 
         target = pred.clone()
+        print(target)
         for idx in range(len(done)):
             Q_new = reward[idx]
             if not done[idx]:

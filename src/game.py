@@ -4,19 +4,20 @@ from collections import namedtuple
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+import scipy as sp
 
 # turn = random.randint(PLAYER, AI)
 
 # TODO: Set these to None (before submission)
 # User inputed Variables
-NumberOfNodes = 20                                  # Population size of Green
-ProbabilityOfConnection = 0.3                       # Determines connectivity of the graph
+NumberOfNodes = 30                                  # Population size of Green
+ProbabilityOfConnection = 0.4                       # Determines connectivity of the graph
 NumberOfGreyAgents = 5                              # Number of times Blue can introduce a foreign power to the population
 RedSpyProportion = 0.01                              # How likely is a foreign power to be bad 
 
 # Certainty related variables
-LowCertainty = -0.5                                 # The certainty below which the agents know a node will NOT vote in the election
-HighCertainty = 0.5                                 # The certainty above which the agents know a node will vote in the election
+LowCertainty = -0.3                                 # The certainty below which the agents know a node will NOT vote in the election
+HighCertainty = 0.3                                 # The certainty above which the agents know a node will vote in the election
 VoteThreshold = (HighCertainty + LowCertainty) / 2  # A certainty level, above which a green node will vote in the election.
 MaxCertainty = 1.0
 MinCertainty = -1.0
@@ -256,7 +257,7 @@ class AAAI_Game:
 
     # Checker function to see if the game has finished.
     def round_limit(self, round):
-        if round == 7: #ELECTION WEEK!
+        if round >= 7: #ELECTION WEEK!
             return True
         return False
     
@@ -330,7 +331,7 @@ class AAAI_Game:
             return True
         if action == 5 and self.NumberOfGreyAgents == 0:
             return False 
-        CostOfMove = (StartingBudgetAUD * multiplierDict[action])/100
+        CostOfMove = (StartingBudgetAUD * multiplierDict[action])/10
         if CurrentBalance >= CostOfMove:
             return True
         if CurrentBalance < CostOfMove and self.NumberOfGreyAgents == 0:
@@ -344,20 +345,22 @@ class AAAI_Game:
     def _move(self, action, team):
         global StartingBudgetAUD, CurrentBalance, round, reward, MaxCertainty, MinCertainty
         if action<= 4:
-            CostOfMove = (StartingBudgetAUD * multiplierDict[action])/100
-            if team == blueTeam and CurrentBalance >= CostOfMove:
-                for n in self.G.nodes: #add multiplier for each message level then affect blue budget
-                    PrevWillVote = self.G.nodes[n]["Will Vote"]
-                    PrevCertainty = self.G.nodes[n]["Certainty"]
-                    self.G.nodes[n]["Certainty"] += abs(self.G.nodes[n]["Certainty"]) * multiplierDict[action]                    
-                    if self.G.nodes[n]["Certainty"] > HighCertainty:
-                        self.G.nodes[n]["Will Vote"] = True
-                   
-                    if self.G.nodes[n]["Certainty"] < LowCertainty:
-                        self.G.nodes[n]["Will Vote"] = True
+            
+            if team == blueTeam:
+                CostOfMove = (StartingBudgetAUD * multiplierDict[action])/10
+                if CurrentBalance >= CostOfMove:
+                    for n in self.G.nodes: #add multiplier for each message level then affect blue budget
+                        PrevWillVote = self.G.nodes[n]["Will Vote"]
+                        PrevCertainty = self.G.nodes[n]["Certainty"]
+                        self.G.nodes[n]["Certainty"] += abs(self.G.nodes[n]["Certainty"]) * multiplierDict[action]                    
+                        if self.G.nodes[n]["Certainty"] > HighCertainty:
+                            self.G.nodes[n]["Will Vote"] = True
                     
-                    if self.G.nodes[n]["Certainty"] > MaxCertainty: 
-                        self.G.nodes[n]["Certainty"] = MaxCertainty
+                        if self.G.nodes[n]["Certainty"] < LowCertainty:
+                            self.G.nodes[n]["Will Vote"] = True
+                        
+                        if self.G.nodes[n]["Certainty"] > MaxCertainty: 
+                            self.G.nodes[n]["Certainty"] = MaxCertainty
 
                 self._update_voting_totals(n, PrevCertainty, multiplierDict[action], blueTeam)
                 # Subtract the cost of the move from the budget.

@@ -1,4 +1,5 @@
 from math import gamma
+
 import math
 import random
 from socket import AI_ALL
@@ -133,6 +134,19 @@ class Agent:
                 final_move[move] = 1
                 display_message(move, blueTeam)
 
+            # if action != 6:
+            #         while game._calc_valid_move(action)!=True:
+            #             if game._calc_valid_move(action)==6:
+            #                 action == 6
+            #                 break
+            #             else:
+            #                 action = get_user_action()
+            #         done = game.play_step(action, blueTeam)
+            #     if action == 6:
+            #         done = game.play_step(action, blueTeam)
+
+
+
 
                 
             else:
@@ -142,6 +156,19 @@ class Agent:
                 final_move[move] = 1
 
         return final_move
+
+def _calc_valid_AI_move(game, action):
+    if action != 6:
+        while game._calc_valid_move(action)!=True:
+            if game._calc_valid_move(action)==6:
+                action == 6
+                break
+            else:
+                action = get_user_action()
+        return True
+    if action == 6:
+        return True
+
 
 def display_message(number, team):
     if team == blueTeam:
@@ -248,6 +275,11 @@ def train():
     AiGamesLost = 0
     turn = random.randint(PLAYER, AI)
     if(PLAYER == redTeam):
+    #     PLAYER = redTeam
+    #     AI = blueTeam
+    # else:
+    #     PLAYER = blueTeam
+    #     AI = redTeam
         PLAYER = redTeam
         AI = blueTeam
     else:
