@@ -100,7 +100,7 @@ class Agent:
         if(AI == redTeam):
             self.red_trainer.train_step(state, action, reward, next_state, game_over)
 
-    def get_action(self, state):
+    def get_action(self, state, game):
         # random moves: tradeoff between exploration and exploitation (deep learning)
         self.epsilon = 80 - self.n_games
         # the more games the smaller the epsilon (or randomness) leading to more tailored moves
@@ -333,7 +333,7 @@ def train():
             current_state = agent.get_state(game)
 
             # get move
-            final_move = agent.get_action(current_state)
+            final_move = agent.get_action(current_state, game)
             final_move_index = final_move.index(1)
 
             # perform move and get new state
