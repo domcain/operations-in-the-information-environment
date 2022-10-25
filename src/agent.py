@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 MAX_MEMORY = 200_000
 BATCH_SIZE = 2000
-LR = 0.001  # LEARNING RATE
+LR = 0.01  # LEARNING RATE
 
 PLAYER = 0
 AI = 1
@@ -46,6 +46,7 @@ class Agent:
         )  # first is size of state, output is 7 (seven different numbers in action). play with hidden.
         self.blue_trainer = Blue_QTrainer(self.blue_model, lr=LR, gamma=self.gamma)
         self.red_trainer = Red_QTrainer(self.red_model, lr=LR, gamma=self.gamma)
+        self.isTesting = isTesting
 
     def get_state(self, game):  # in video 11 states/values
         WillVote, WontVote = game._update_will_vote_values(game.G) #returns the amount of green nodes voting
@@ -121,16 +122,10 @@ class Agent:
         if AI == blueTeam:
             final_move = [0, 0, 0, 0, 0, 0, 0]  # 5 levels of budget spend in ascending order with the last two options being play a grey agent and do nothing (respectively)
             if random.randint(0, 200) < self.epsilon:
-                while True:
-                    move = random.randint(0, 6)  # gives random number between 0 and 6 = random.randint(0,6)
-                    if CostOfMove > CurrentBalance:
-                        move = 6
-                    if move == 6 and NumberOfGreyAgents == 0:
-                        continue
-                    if NumberOfGreyAgents != 0 and move == 5:
-                        break
-                    else:
-                        break 
+                move = random.randint(0, 6)  # gives random number between 0 and 6 = random.randint(0,6)
+                while game._calc_valid_move(move)!=True:
+                        move = random.randint(0, 6)
+                
                 final_move[move] = 1
                 display_message(move, blueTeam)
 
@@ -207,10 +202,10 @@ def get_user_action():
             # return 0
             
             # Medium Approach
-            return 3
+            # return 3
 
             # Hard Approach
-            # return 4
+            return 4
 
             # Random Completely
             # return random.randint(0,4)
@@ -269,11 +264,11 @@ def train():
     done = False
     game = AAAI_Game()
     agent = Agent(game)
-    # game.__init__()
     # turn = PLAYER
     AiGamesWon = 0
     AiGamesLost = 0
     turn = random.randint(PLAYER, AI)
+    PLAYER = redTeam #TODO: CHANGE ME to 0 for Blue and 1 for Red for testing 
     if(PLAYER == redTeam):
     #     PLAYER = redTeam
     #     AI = blueTeam
@@ -281,10 +276,14 @@ def train():
     #     PLAYER = blueTeam
     #     AI = redTeam
         PLAYER = redTeam
+        game.PLAYER = redTeam
         AI = blueTeam
+        game.AI = blueTeam
     else:
         PLAYER = blueTeam
+        game.PLAYER = blueTeam
         AI = redTeam
+        game.AI = redTeam
     while True:  # training loop
         if done:
             # If game is over, train long-term memory and plot the result
@@ -397,9 +396,14 @@ def train():
                 action = get_user_action() #get user input
                 if action != 6:
                     while game._calc_valid_move(action)!=True:
-                        if game._calc_valid_move(action)==6:
-                            action == 6
-                            break
+                        if agent.isTesting:
+                            if action >= 0:
+                                action -= 1
+                            if action < 0:
+                                action = 6
+                        # if game._calc_valid_move(action)==6:
+                        #     action = 6
+                        #     break
                         else:
                             action = get_user_action()
                     done = game.play_step(action, blueTeam)
