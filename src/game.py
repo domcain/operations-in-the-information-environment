@@ -15,38 +15,32 @@ NumberOfGreyAgents = (
 )
 RedSpyProportion = 0.75  # How likely is a foreign power to be bad
 
-# Certainty related variables
-LowCertainty = (
-    -0.3
-)  # The certainty below which the agents know a node will NOT vote in the election
-HighCertainty = (
-    0.3  # The certainty above which the agents know a node will vote in the election
-)
+# Certainty related variables:
+# LowCertainty is the certainty below which the agents know a node will NOT vote in the election
+# HighCertainty is the certainty above which the agents know a node will vote in the election
+# # A certainty level, above which a green node will  vote in the election.
+#
+LowCertainty = -0.3
+HighCertainty = 0.3
 VoteThreshold = (
     HighCertainty + LowCertainty
 ) / 2  # A certainty level, above which a green node will vote in the election.
 MaxCertainty = 1.0
 MinCertainty = -1.0
 
-# Tolerance related variables
-StandardTolerance = (
-    9  # Standard deviation - determines the spread of tolerances produced
-)
-AverageTolerance = 60  # Mean - anchors the distribution
-ToleranceFloat = np.random.normal(
-    AverageTolerance, StandardTolerance, NumberOfNodes
-)  # Creates a normal distribution of tolerance value's to be given to each member of the green population.
-Tolerance = ToleranceFloat.astype(
-    int
-)  # Above ^^^ creates an array of floats, convert this into an array of integers.
+# Tolerance related variables:
+# Standard deviation determines the spread of tolerances produced
+# Average tolerance sets the mean, anchoring the distribution
+# ToleranceFloat creates a normal distribution of tolerance value's to be given to each member of the green population.
+# Tolerance converts array of floats into an array of integers.
+StandardTolerance = 9
+AverageTolerance = 60
+ToleranceFloat = np.random.normal(AverageTolerance, StandardTolerance, NumberOfNodes)
+Tolerance = ToleranceFloat.astype(int)
 
-# Agent related variables
-
+# TODO: uncomment to set the turns when testing
 # self.PLAYER = 0
 # self.AI = 1
-
-# TODO: if having a user play the game uncomment this
-# turn = random.randint(PLAYER, AI)
 
 TotalVoting = 0  #
 TotalNotVoting = 0  #
@@ -83,7 +77,6 @@ class AAAI_Game:
     # Creates a GUI to display the game state to the user.
     def __init__(self):
         global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold, StandardTolerance, AverageTolerance
-        # self.reset()
 
         NumberOfNodes = int(input("Enter the population of Greenland: "))
         ProbabilityOfConnection = float(
@@ -113,10 +106,7 @@ class AAAI_Game:
         ToleranceFloat = np.random.normal(
             AverageTolerance, StandardTolerance, self.NumberOfNodes
         )  # Creates a normal distribution of tolerance value's to be given to each member of the green population.
-        Tolerance = ToleranceFloat.astype(
-            int
-        )
-
+        Tolerance = ToleranceFloat.astype(int)
 
         print(
             "Population of Greenland: " + str(NumberOfNodes) + "\n",
@@ -183,7 +173,7 @@ class AAAI_Game:
     #   Creates a new GUI
     def reset(self):
         global turn, TotalVoting, TotalNotVoting, StartingBudgetAUD, CurrentBalance, Tolerance
-        
+
         print("\nNEW GAME\n")
         # init game state
         self.G.clear()
@@ -194,9 +184,7 @@ class AAAI_Game:
         ToleranceFloat = np.random.normal(
             AverageTolerance, StandardTolerance, self.NumberOfNodes
         )  # Creates a normal distribution of tolerance value's to be given to each member of the green population.
-        Tolerance = ToleranceFloat.astype(
-            int
-        )
+        Tolerance = ToleranceFloat.astype(int)
 
         for i in self.G.nodes:
             self.G.nodes[i]["Team"] = "Green"
