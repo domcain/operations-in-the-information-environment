@@ -205,18 +205,19 @@ class AAAI_Game:
         CurrentBalance = StartingBudgetAUD
         self.NumberOfGreyAgents = NumberOfGreyAgents
 
-        # self.PLAYER = random.randint(blueTeam, redTeam)
-        # if self.PLAYER == redTeam:
-        #     self.PLAYER = redTeam
-        #     self.AI = blueTeam
-        # else:
-        #     self.PLAYER = blueTeam
-        #     self.AI = redTeam
+        # TODO  Add this back for randomising who is what team, Comment out for testing
+        self.PLAYER = random.randint(blueTeam, redTeam)
+        if self.PLAYER == redTeam:
+            self.PLAYER = redTeam
+            self.AI = blueTeam
+        else:
+            self.PLAYER = blueTeam
+            self.AI = redTeam
+        turn = redTeam
 
-        # TODO  Add this back for randomising who is what team ^
-
-        self.AI = 0  # TODO: CHANGE ME to 0 for Blue and 1 for Red
-        self.PLAYER = 1  # TODO: CHANGE ME to 0 for Blue and 1 for Red
+        # TODO: add back for testing
+        # self.AI = 0  # TODO: CHANGE ME to 0 for Blue and 1 for Red
+        # self.PLAYER = 1  # TODO: CHANGE ME to 0 for Blue and 1 for Red
         return self.PLAYER, self.AI
 
     # If the game has run its' course, stop and return the current score.

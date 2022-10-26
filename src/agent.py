@@ -309,8 +309,9 @@ def train():
     # turn = PLAYER
     AiGamesWon = 0
     AiGamesLost = 0
-    turn = random.randint(PLAYER, AI)
-    PLAYER = blueTeam  # TODO: CHANGE ME to 0 for Blue and 1 for Red for testing
+    PLAYER = random.randint(blueTeam, redTeam)  # TODO:
+    turn = redTeam  # RED Plays first
+    # PLAYER = blueTeam  # TODO: CHANGE ME to 0 for Blue and 1 for Red for testing
     if PLAYER == redTeam:
         #     PLAYER = redTeam
         #     AI = blueTeam
