@@ -83,6 +83,24 @@ class AAAI_Game:
     # Creates a GUI to display the game state to the user.
     def __init__(self):
         global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold
+        # self.reset()
+
+        NumberOfNodes = int(input("Enter the population of Greenland: "))
+        ProbabilityOfConnection = float(
+            input(
+                "Enter the probability of a connection between any given Greenlander: "
+            )
+        )
+        NumberOfGreyAgents = int(input("Enter Number of Foreign Agents: "))
+        RedSpyProportion = float(
+            input("Enter the proportion of Red Spies within the Foreign Agents: ")
+        )
+        LowCertainty, HighCertainty = [
+            float(x)
+            for x in input(
+                "Enter the uncertainty interval of the Greenlanders. (e.g. [-0.1,0.1] or [-0.5,0.7]): "
+            ).split(",")
+        ]
         self.NumberOfNodes = NumberOfNodes
         self.NumberOfGreyAgents = NumberOfGreyAgents
         self.score = 0
@@ -91,29 +109,18 @@ class AAAI_Game:
         self.AI = 0
         self.PLAYER = 1
         self.WhoWon = self.AI
+        VoteThreshold = (HighCertainty + LowCertainty) / 2
 
-        # self.reset()
-
-        # NumberOfNodes = int(input("Enter the size of the Green Team: "))
-        # ProbabilityOfConnection = float(input(
-        #     "Enter the probability of a connection between any given green player: "
-        # ))
-        # NumberOfGreyAgents = int(input("Enter Number of agents in the Grey Team: "))
-        # RedSpyProportion = float(input("Enter the proportion of Red Spies within the Grey Team: "))
-        # LowCertainty,HighCertainty = [float(x) for x in input(
-        #     "Enter the Certainty interval of the Green Team. (e.g. [-0.1,0.1] or [-0.5,0.7]): "
-        # ).split(',')]
-        # VoteThreshold = (HighCertainty + LowCertainty) / 2
         print(
-            "Size of the Green Team: " + str(NumberOfNodes) + "\n",
-            "Probability of a connection between any given green player: "
+            "Population of Greenland: " + str(NumberOfNodes) + "\n",
+            "Probability of a connection between any given Greenlander: "
             + str(ProbabilityOfConnection)
             + "\n",
-            "Number of agents in the Grey Team: " + str(NumberOfGreyAgents) + "\n",
-            "Proportion of Red Spies within the Grey Team: "
+            "Number of Foreign Agents: " + str(NumberOfGreyAgents) + "\n",
+            "Proportion of Red Spies among the Foreign Agents: "
             + str(RedSpyProportion)
             + "\n",
-            "Certainty interval of the Green Team: "
+            "Uncertainty interval of the Greenlanders: "
             + str(LowCertainty)
             + ", "
             + str(HighCertainty)
@@ -216,6 +223,9 @@ class AAAI_Game:
     # Otherwise, play a move and update the GUI.
     def play_step(self, action, turn):
         global TotalVoting, TotalNotVoting
+        print("\n\nVoting: ", TotalVoting)
+        print("Not Voting: ", TotalNotVoting, "\n\n")
+
         old_TeamVoting = TotalVoting
         old_TeamNotVoting = TotalNotVoting
 
@@ -228,7 +238,7 @@ class AAAI_Game:
 
         # Plays a move based upon the users input
         if turn == self.PLAYER:
-            self._move(action, self.PLAYER)
+            # self._move(action, self.PLAYER) #TODO: Possibly remove this as it plays on behalf of the player?
             game_over = False
             self.round += 0.5
 

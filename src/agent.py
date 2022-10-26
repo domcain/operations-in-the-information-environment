@@ -25,9 +25,10 @@ NoOfActions = 5
 
 # Set to True to test with random moves
 # TODO: to play as a human, set isTesting to false
-isTesting = True
+isTesting = False
 
-turn = blueTeam
+# Red goes first
+turn = redTeam
 
 
 class Agent:
