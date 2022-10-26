@@ -244,8 +244,8 @@ def get_user_action():
             try:
                 level = int(
                     input(
-                        "Red Team Options: \n",
-                        "    - Enter a message potency of your choice (1 - 5) \n",
+                        "Red Team Options: \n"+
+                        "    - Enter a message potency of your choice (1 - 5) \n"
                     )
                 )
             except ValueError:

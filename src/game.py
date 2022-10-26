@@ -82,7 +82,7 @@ class AAAI_Game:
     # Creates a new graph using the inputs and intialise its' nodes.
     # Creates a GUI to display the game state to the user.
     def __init__(self):
-        global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold
+        global NumberOfNodes, ProbabilityOfConnection, NumberOfGreyAgents, RedSpyProportion, LowCertainty, HighCertainty, VoteThreshold, StandardTolerance, AverageTolerance
         # self.reset()
 
         NumberOfNodes = int(input("Enter the population of Greenland: "))
@@ -110,6 +110,13 @@ class AAAI_Game:
         self.PLAYER = 1
         self.WhoWon = self.AI
         VoteThreshold = (HighCertainty + LowCertainty) / 2
+        ToleranceFloat = np.random.normal(
+            AverageTolerance, StandardTolerance, self.NumberOfNodes
+        )  # Creates a normal distribution of tolerance value's to be given to each member of the green population.
+        Tolerance = ToleranceFloat.astype(
+            int
+        )
+
 
         print(
             "Population of Greenland: " + str(NumberOfNodes) + "\n",
@@ -175,7 +182,8 @@ class AAAI_Game:
     #   Choses who will move first and what team they are on
     #   Creates a new GUI
     def reset(self):
-        global turn, TotalVoting, TotalNotVoting, StartingBudgetAUD, CurrentBalance
+        global turn, TotalVoting, TotalNotVoting, StartingBudgetAUD, CurrentBalance, Tolerance
+        
         print("\nNEW GAME\n")
         # init game state
         self.G.clear()
@@ -183,6 +191,12 @@ class AAAI_Game:
         nx.draw(self.G, node_color="Green", with_labels=1)
 
         self.G = nx.gnp_random_graph(NumberOfNodes, ProbabilityOfConnection)
+        ToleranceFloat = np.random.normal(
+            AverageTolerance, StandardTolerance, self.NumberOfNodes
+        )  # Creates a normal distribution of tolerance value's to be given to each member of the green population.
+        Tolerance = ToleranceFloat.astype(
+            int
+        )
 
         for i in self.G.nodes:
             self.G.nodes[i]["Team"] = "Green"
